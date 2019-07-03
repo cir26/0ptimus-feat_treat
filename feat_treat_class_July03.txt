@@ -174,31 +174,47 @@ class feat_treat:
 
     def rfe(self,n,rfe_model=None):
         if isinstance(n,int)==True or isinstance(n,float)==True:
-            keep=[]
             if rfe_model==None:
                 from sklearn.linear_model import LogisticRegression
                 rfe_model=LogisticRegression(solver='lbfgs')
                 from sklearn.feature_selection import RFE
-                selector = RFE(estimator=rfe_model, n_features_to_select = n)
-                selector = selector.fit(self.X,self.y)
-                for i in range(0,len(selector.support_)) :
-                    if selector.support_[i]==True:
-                        keep.append(i)
+                selector = RFE(estimator=rfe_model, n_features_to_select = n).fit(self.X,self.y)
+                keep = [i for i in range(0,len(selector.support_)) if selector.support_[i]==True]
                 self.X=self.X.iloc[:,keep]
             else:
                 from sklearn.feature_selection import RFE
-                selector = RFE(estimator=rfe_model, n_features_to_select = n)
-                selector = selector.fit(self.X,self.y)
-                for i in range(0,len(selector.support_)) :
-                    if selector.support_[i]==True:
-                        keep.append(i)
+                selector = RFE(estimator=rfe_model, n_features_to_select = n).fit(self.X,self.y)
+                keep = [i for i in range(0,len(selector.support_)) if selector.support_[i]==True]
                 self.X=self.iloc[:,keep]
 #       section to include optimization loop
         else:
-            n = ''.join(k.split()).lower()
+            n = ''.join(n.split()).lower()
             n = n[:3]
             if n == 'opt':
                 pass
+
+
+
+    def skb(self,k,score_func=None):
+        if self.encoded == True:
+            if isinstance(k,int)==True or isinstance(k,float)==True:
+                if score_func==None:
+                    from sklearn.feature_selection import SelectKBest, chi2
+                    skb =SelectKBest(score_func=chi2, k=k).fit(self.X,self.y)
+                    self.X = self.X.iloc[:,skb.get_support(indices=True)]
+                else:
+                    from sklearn.feature_selection import SelectKBest, score_func
+                    skb = SelectKBest(score_func=score_func, k=k).fit(self.X,self.y)
+                    self.X = self.X.iloc[:,skb.get_support(indices=True)]
+
+#           section to include optimization loop
+            else:
+                n = ''.join(k.split()).lower()
+                n = n[:3]
+                if n == 'opt':
+                    pass
+        else:
+            print('Please encode feature set first')
 
 
 
@@ -206,12 +222,11 @@ class feat_treat:
         if isinstance(n,int)==True or isinstance(n,float)==True:
             col = self.X.columns
             from sklearn.decomposition import TruncatedSVD
-            svd = TruncatedSVD(n_components=n, n_iter=5, random_state=self.random_state)
-            svd = svd.fit(self.X)
+            svd = TruncatedSVD(n_components=n, n_iter=5, random_state=self.random_state).fit(self.X)
             self.X = pd.DataFrame(svd.transform(self.X), columns=['SV %i' % i for i in range(n)], index=self.X.index)
 #       section to include optimization loop
         else:
-            n = ''.join(k.split()).lower()
+            n = ''.join(n.split()).lower()
             n = n[:3]
             if n == 'opt':
                 pass
@@ -221,19 +236,18 @@ class feat_treat:
     def pca(self,n):
         if isinstance(n,int)==True or isinstance(n,float)==True:
             from sklearn.decomposition import PCA
-            pca = PCA(n_components=n, random_state=self.random_state)
-            pca = pca.fit(self.X)
+            pca = PCA(n_components=n, random_state=self.random_state).fit(self.X)
             self.X = pd.DataFrame(pca.transform(self.X), columns=['PCA %i' % i for i in range(n)], index=self.X.index)
 #       section to include optimization loop
         else:
-            n = ''.join(k.split()).lower()
+            n = ''.join(n.split()).lower()
             n = n[:3]
             if n == 'opt':
                 pass
 
 
 #   def sample(strategy):
-    def sample_tune_test(self,model,tuning_iter,test_size=0.2,tuning_strategy='randomized',tuning_metric='roc_auc'):
+    def sample_tune_test(self,model,tuning_iter,tuning_strategy='randomized',tuning_metric='roc_auc',test_size=0.2):
         from sklearn.model_selection import train_test_split
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)
 #       function to automatically sample, HP tune, then test with best parameters
@@ -302,9 +316,9 @@ class feat_treat:
                 bootstrap = Categorical([True, False])
                 n_estimators = [350,450]
                 criterion= Categorical(['gini','entropy'])
-                max_depth =np.arange(0,floor(len(X_train.columns)),1)
-                max_features = np.random.uniform(0,1,10000)
-                min_samples_split = np.random.uniform(0,1,10000)
+                max_depth =np.arange(1,floor(len(X_train.columns)),1)
+                max_features = np.random.uniform(0.01,1,10000)
+                min_samples_split = np.random.uniform(0.01,1,10000)
                 min_samples_leaf = np.random.uniform(0.0001,0.5,10000)
                 class_weight = Categorical(['balanced','balanced_subsample',None])
                 n_jobs = [-1]
@@ -327,7 +341,7 @@ class feat_treat:
                 booster = Categorical(['gbtree','gblinear','dart'])
                 n_estimators = [350,450]
                 learning_rate = np.random.uniform(0.000001,1,10000)
-                max_depth = np.arange(0,floor(len(X_train.columns)),1)
+                max_depth = np.arange(1,floor(len(X_train.columns)),1)
                 gamma = np.random.uniform(0,15,10000)
                 reg_alpha = np.random.uniform(0,1,10000)
                 reg_lambda = np.random.uniform(0,1,10000)
@@ -386,8 +400,8 @@ class feat_treat:
 #               default hyperparameter testing range
                 bootstrap = Categorical([True, False])
                 n_estimators = [350,450]
-                max_samples= np.random.uniform(0,1,10000)
-                max_features = np.random.uniform(0,1,10000)
+                max_samples= np.random.uniform(0.01,1,10000)
+                max_features = np.random.uniform(0.01,1,10000)
                 contamination = np.random.uniform(0,0.2,10000)
                 behaviour = Categorical(['new'])
                 n_jobs = [-1]
@@ -411,9 +425,11 @@ class feat_treat:
                 param_grid_cat = {k: v for k, v in param_grid.items() if isinstance(v,Categorical)==True or k=='n_jobs' or k=='random_state'}
                 param_grid_num = {k:(min(v),max(v)) for k,v in param_grid.items() if k not in param_grid_cat}
                 param_grid={**param_grid_num,**param_grid_cat}
-                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, cv=kfold, n_iter=floor(tuning_iter/len(samples)),verbose=False)
+                import warnings
+                warnings.filterwarnings('ignore', message='The objective has been evaluated at this point before.')
+                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, cv=kfold, n_iter=floor(tuning_iter/len(samples)),verbose=0)
             elif tuning_strategy=='randomized':
-                grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, cv=kfold, n_iter=floor(tuning_iter/len(samples)),verbose=False)
+                grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, cv=kfold, n_iter=floor(tuning_iter/len(samples)),verbose=0)
             print('Tuning...')
             grid_results=grid_search.fit(samples[i][0],samples[i][1])
             best_param[i]=grid_results.best_params_

@@ -1,5 +1,32 @@
+# main dependencies
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+from math import floor, ceil, pi
+import copy
+from random import randint
+# scikit tools
+from sklearn import preprocessing
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import RFECV
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
+from skopt import BayesSearchCV
+from skopt.space import Real, Categorical, Integer
+# sampling tools
+from imblearn.under_sampling import RandomUnderSampler, TomekLinks
+from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import SMOTE
+from imblearn.combine import SMOTETomek, SMOTEENN
+
+
 class validation:
-    
+
     def tune_test(self,model,tuning_iter,sample=True,tuning_strategy='randomized',tuning_metric='roc_auc',test_size=0.2, skfold=8):
 #       split into training and test sets
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)

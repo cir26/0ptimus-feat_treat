@@ -473,3 +473,16 @@ class feat_treat(feat_treat_static.static, feat_treat_validation.validation):
                 print("Optimal n: {} \n Score: {} \n".format(n_best,high_score))
                 pca = PCA(n_components=n_best, random_state=self.random_state).fit(self.X)
                 self.X = pd.DataFrame(pca.transform(self.X), columns=['PCA %i' % i for i in range(n_best)], index=self.X.index)
+
+
+
+    def match_features(self, to):
+#       match object features to argument features
+#       identify columns to drop and add
+        match_columns = to.columns.to_list()
+        drop_columns = [col for col in self.X.columns.to_list() if col not in match_columns]
+        add_columns = [col for col in match_columns if col not in self.X.columns.to_list()]
+#       first pass: remove extra features
+        self.X = self.X.drop(columns = drop_columns)
+#       second pass: add missing features as empty columns
+        self.X = self.X.reindex(columns = self.X.columns.to_list() + add_columns)

@@ -27,6 +27,7 @@ from imblearn.combine import SMOTETomek, SMOTEENN
 
 class static:
 
+                
     @staticmethod
     def performance_metrics(y_test, probs, pred_threshold=0.5, sample_method_label='None', index=0, verbose=True):
 #       returns dataframe of various performance metrics
@@ -62,7 +63,7 @@ class static:
             print('Recall:            ', recall)
             print('Specificity:       ', specificity)
             print('Neg Pred Val:      ', neg_pred)
-            print('Confusion Sum:     ', conf_sum)
+            print('Confusion Sum:     ', conf_sum)                
             print(' ')
             print('F1 score:          ', f1)
             print('F2 score:          ', f2)
@@ -73,7 +74,7 @@ class static:
         #               print("Jaccard score:     ", jaccard)
             print("Brier score loss:  ", brier)
             print('MCC:               ', mcc)
-            print("AUC:               ", auc_score, "\n")
+            print("AUC:               ", auc_score, "\n") 
         #-------- ROC CURVE --------------
             plt.figure()
             lw=2
@@ -85,7 +86,7 @@ class static:
             plt.ylabel('True Positive Rate')
             plt.title(' Sampling: {} \n Receiver Operating Characteristic'.format(sample_method_label))
             plt.legend(loc="lower right")
-            plt.show()
+            plt.show()    
         #-----------------------------------
         #-------- Precision-Recall CURVE --------------
             unique_elements, counts_elements = np.unique(y_test, return_counts=True)
@@ -122,7 +123,7 @@ class static:
                     "AUC" : auc_score},index=[index])
         df=df.fillna(0)
         return df
-
+    
     @staticmethod
     def select_hyperparameter_grid(model,feature_set, random_state=42):
         col_length=len(feature_set.columns)
@@ -143,9 +144,9 @@ class static:
             random_state = [random_state]
 #           input hyperparameters into dictionary
             param_grid = dict(n_estimators=n_estimators,
-                              bootstrap=bootstrap,
+                              bootstrap=bootstrap, 
                               criterion=criterion,
-                              min_samples_leaf=min_samples_leaf,
+                              min_samples_leaf=min_samples_leaf, 
                               min_samples_split=min_samples_split,
                               max_features=max_features,
                               max_depth=max_depth,
@@ -185,7 +186,7 @@ class static:
                               min_child_weight=min_child_weight,
                               max_delta_step=max_delta_step,
                               n_jobs=n_jobs,
-                              random_state=random_state)
+                              random_state=random_state)          
 
         elif("LogisticRegression" in str(model)):
 #           default hyperparameter testing range
@@ -254,7 +255,7 @@ class static:
             beta_2 = np.random.uniform(0,1,10000)
 #           input hyperparameters into dictionary
             param_grid = dict(hidden_layer_sizes=hidden_layer_sizes,
-                              activation=activation,
+                              activation=activation, 
                               solver=solver,
                               tol=tol,
                               alpha=alpha,
@@ -310,7 +311,7 @@ class static:
             ax.fill(angles, values, colors[i], alpha=0.1)
         # Add legend
         plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
-        return plt
+        return plt    
 
     @staticmethod
     def resampler(sample, X_train, y_train):
@@ -324,41 +325,41 @@ class static:
                 pass
             samples = [(X_train,y_train,"None")]
             for i in sample:
-                i=''.join(i.split()).lower()
+                i=''.join(i.split()).lower()                    
                 if i in ['rus','randomundersampling','randomundersample']:
                     rus = RandomUnderSampler()
                     X_rus, y_rus = rus.fit_sample(X_train, y_train)
                     X_rus = pd.DataFrame(X_rus, columns = col)
                     samples.append(tuple([X_rus,y_rus,"Random under sampling"]))
-
+                
                 elif i in ['ros','randomoversampling','randomoversample']:
                     ros = RandomOverSampler()
                     X_ros, y_ros = ros.fit_sample(X_train, y_train)
                     X_ros = pd.DataFrame(X_ros, columns = col)
                     samples.append(tuple([X_ros,y_ros,"Random over sampling"]))
-
+                
                 elif i in ['smote']:
                     smote = SMOTE(ratio='minority')
                     X_sm, y_sm = smote.fit_sample(X_train, y_train)
                     X_sm = pd.DataFrame(X_sm, columns = col)
                     samples.append(tuple([X_sm,y_sm,"SMOTE"]))
-
+                
                 elif i in ['smotetl','smote+tl','tlsmote','tl+smote']:
                     smt = SMOTETomek(ratio='auto')
                     X_smt, y_smt = smt.fit_sample(X_train, y_train)
                     X_smt = pd.DataFrame(X_smt, columns = col)
                     samples.append(tuple([X_smt,y_smt,"SMOTE + TL"]))
-
+                    
                 elif i in ['smoteenn','smotenn','ennsmote','smote+enn','enn+smote']:
                     sme = SMOTEENN(ratio='auto')
                     X_sme, y_sme = sme.fit_sample(X_train, y_train)
                     X_sme = pd.DataFrame(X_sme, columns = col)
                     samples.append(tuple([X_sme,y_sme,"SMOTE + ENN"]))
-
+                    
                 elif i in ['tl','tomek','tomeklink','tomeklinks']:
                     tl=TomekLinks(sampling_strategy='all')
                     X_tl, y_tl = tl.fit_sample(X_train,y_train)
                     X_tl = pd.DataFrame(X_tl, columns = col)
                     samples.append(tuple([X_tl,y_tl,"Tomek link"]))
-
-        return samples
+        
+        return samples  

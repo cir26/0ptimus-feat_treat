@@ -100,7 +100,7 @@ class validation:
             model.fit(samples[i][0],samples[i][1])
             probs = model.predict_proba(X_test[samples[i][0].columns])
             #return performance metrics
-            df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method=samples[i][2],index=i)
+            df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
             self.metrics=self.metrics.append(df)
 #           end of loop
         self.hyperparameters=best_param
@@ -177,7 +177,7 @@ class validation:
                     model=model_rep(**params)
                     model.fit(samples[i][0],samples[i][1])
                     probs = model.predict_proba(X_test[samples[i][0].columns])
-                    df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method=samples[i][2],index=(N*j)+i, verbose=False)
+                    df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                     metrics_log=metrics_log.append(df)
 #       return dataframe of average column scores of each sampling method
         ave_metrics = metrics_log.groupby("Sampling").mean()

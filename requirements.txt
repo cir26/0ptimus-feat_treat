@@ -1,0 +1,7 @@
+pandas == 0.24.2
+numpy == 1.16.2
+matplotlib == 3.0.3
+scipy == 1.2.1
+scikit-learn == 0.21.2
+scikit-optimize == 0.6.0
+imblearn == 0.5.0

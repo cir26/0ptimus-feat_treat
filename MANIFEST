@@ -2,6 +2,6 @@
 README.txt
 setup.py
 Feat_Treat/__init__.py
-Feat_Treat/feat_treat.py
-Feat_Treat/feat_treat_static.py
-Feat_Treat/feat_treat_validation.py
+Feat_Treat/main.py
+Feat_Treat/static.py
+Feat_Treat/validation.py

@@ -27,7 +27,7 @@ from imblearn.combine import SMOTETomek, SMOTEENN
 
 class validation:
 
-    def tune_test(self,model,tuning_iter,sample=True,tuning_strategy='randomized',tuning_metric='roc_auc',test_size=0.2, skfold=8):
+    def tune_test(self,model,tuning_iter, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, skfold=8):
 #       split into training and test sets
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)
 #       test set will remain untouched until making predictions with tuned model
@@ -44,14 +44,24 @@ class validation:
         else:
             pass
 
-        param_grid = self.select_hyperparameter_grid(model=model,feature_set=X_train,random_state=self.random_state)
+        if param_grid==None:
+            param_grid = self.select_hyperparameter_grid(model=model,feature_set=X_train,random_state=self.random_state)
+        else:
+            pass
+#       check for bayes or random search
+        tuning_strategy=''.join(tuning_strategy.split()).lower()
+        if tuning_strategy=='bayes':
+            # unpack hyperparameters
+            param_grid_cat = {k: v for k, v in param_grid.items() if isinstance(v,Categorical)==True or k=='n_jobs' or k=='random_state'}
+            param_grid_num = {k:(min(v),max(v)) for k,v in param_grid.items() if k not in param_grid_cat}
+            param_grid={**param_grid_num,**param_grid_cat}
+        elif tuning_strategy =='randomized':
+            pass
+
         samples = self.resampler(sample=sample,X_train=X_train,y_train=y_train)
 
 #       tune and test
         N = len(samples)
-#       check that tuning_iter and number of samples agree
-        if N > tuning_iter:
-            tuning_iter = N
         best_param=[0]*N
         self.metrics=pd.DataFrame(columns=["Sampling",
                                            "Accuracy",
@@ -76,18 +86,13 @@ class validation:
 #           instantiate model for tuning purposes
             model_inst=model_rep()
             print("Sampling technique: ",samples[i][2], "\n ")
-            tuning_strategy=''.join(tuning_strategy.split()).lower()
 #           check for bayes or random search
             if tuning_strategy=='bayes':
-                # unpack hyperparameters
-                param_grid_cat = {k: v for k, v in param_grid.items() if isinstance(v,Categorical)==True or k=='n_jobs' or k=='random_state'}
-                param_grid_num = {k:(min(v),max(v)) for k,v in param_grid.items() if k not in param_grid_cat}
-                param_grid={**param_grid_num,**param_grid_cat}
                 import warnings
                 warnings.filterwarnings('ignore', message='The objective has been evaluated at this point before.')
-                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, n_points=4, cv=inner_kfold, n_iter=floor(tuning_iter/N),verbose=0)
+                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, n_points=4, cv=inner_kfold, n_iter=tuning_iter,verbose=0)
             elif tuning_strategy=='randomized':
-                grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', refit=True, cv=inner_kfold, n_iter=floor(tuning_iter/N),verbose=0)
+                grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', refit=True, cv=inner_kfold, n_iter=tuning_iter,verbose=0)
             print('Tuning...')
             grid_results=grid_search.fit(samples[i][0],samples[i][1])
             best_param[i]=(samples[i][2], grid_results.best_estimator_.get_params())
@@ -157,7 +162,7 @@ class validation:
                             model=model_rep(**param)
                             model.fit(samples[i][0],samples[i][1])
                             probs = model.predict_proba(X_test[samples[i][0].columns])
-                            df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method=samples[i][2],index=(N*j)+i, verbose=False)
+                            df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                             metrics_log=metrics_log.append(df)
                             fitted=fitted+1
                         else:
@@ -168,7 +173,7 @@ class validation:
                         model=model_rep(**param)
                         model.fit(samples[i][0],samples[i][1])
                         probs = model.predict_proba(X_test[samples[i][0].columns])
-                        df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method=samples[i][2],index=(N*j)+i, verbose=False)
+                        df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                         metrics_log=metrics_log.append(df)
                     else:
                         pass
@@ -192,3 +197,4 @@ class validation:
                                  'AUC']]
         radar_plot = self.create_radar_chart(radar_df=simple_ave_metrics)
         radar_plot.show()
+        

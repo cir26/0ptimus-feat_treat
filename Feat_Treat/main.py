@@ -33,9 +33,8 @@ from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 # sampling tools
-from imblearn.under_sampling import RandomUnderSampler, TomekLinks
-from imblearn.over_sampling import RandomOverSampler
-from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler, TomekLinks, OneSidedSelection, NeighbourhoodCleaningRule
+from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
 from imblearn.combine import SMOTETomek, SMOTEENN
 
 # self dependencies
@@ -47,7 +46,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         self.X=X
         self.y=y
         self.random_state=random_state
-        self.encoded=False
+        self.encoded=[]
         self.na_col='update with check_na(percent_threshold,axis=1)'
         self.na_row='update with check_na(percent_threshold,axis=0)'
         self.metrics='No metrics available'
@@ -63,7 +62,6 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 if np.var(self.X[col]) < var_threshold:
                     drop.append(col)
         self.X=self.X.drop(columns=drop)
-
         # GET TO KNOW YOUR DATA SET
         # return dataframe indices for categorical datatypes
         obj = [self.X.columns.get_loc(i) for i in self.X.columns if self.X[i].dtype == 'object']
@@ -229,17 +227,21 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
     def encode(self, strategy=None, cat_col=None):
         if cat_col==None:
             cat_col=[i for i in self.X.columns if (self.X[i].dtype != 'float64' and self.X[i].dtype != 'int64')]
+        else:
+            pass
         if(strategy=='dummy'):
             self.X=pd.get_dummies(self.X, columns=cat_col)
-            self.encoded=True
+            cat_col = [i for i in cat_col if i not in self.encoded]
+            self.encoded.append(cat_col)
         elif strategy == None or strategy == 'label':
             if len(cat_col)>0:
                 le = preprocessing.LabelEncoder()
                 for col in cat_col:
                     self.X[col]=le.fit_transform(self.X[col])
-                self.encoded=True
+                cat_col = [i for i in cat_col if i not in self.encoded]
+                self.encoded.append(cat_col)
             else:
-                print("No categorical variables in data set")
+                print("No categorical variables identified in data set")
 
 
     def rfe(self,n=None,cum=None,rfe_model=None):

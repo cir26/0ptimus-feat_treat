@@ -19,11 +19,9 @@ from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 # sampling tools
-from imblearn.under_sampling import RandomUnderSampler, TomekLinks
-from imblearn.over_sampling import RandomOverSampler
-from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler, TomekLinks, OneSidedSelection, NeighbourhoodCleaningRule
+from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
 from imblearn.combine import SMOTETomek, SMOTEENN
-
 
 class validation:
 

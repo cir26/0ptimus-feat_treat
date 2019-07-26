@@ -42,7 +42,7 @@ from imblearn.combine import SMOTETomek, SMOTEENN
 import Feat_Treat.static
 import Feat_Treat.validation
 
-class feat_treat(Feat_Treat.static.static, Feat_Treat.validation.validation):
+class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
     def __init__(self,X,y,random_state):
         self.X=X
         self.y=y

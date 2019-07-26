@@ -86,11 +86,19 @@ class validation:
 #           instantiate model for tuning purposes
             model_inst=model_rep()
             print("Sampling technique: ",samples[i][2], "\n ")
-#           check for bayes or random search
-            if tuning_strategy=='bayes':
+#           check for bayes, bayes:rf, bayes:et, bayes:gbrt, or random search
+            if tuning_strategy[:5]=='bayes':
                 import warnings
                 warnings.filterwarnings('ignore', message='The objective has been evaluated at this point before.')
-                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, n_points=4, cv=inner_kfold, n_iter=tuning_iter,verbose=0)
+                if tuning_strategy=='bayes:rf':
+                    optimizer={'base_estimator': 'RF'}
+                elif tuning_strategy=='bayes:et':
+                    optimizer={'base_estimator': 'ET'}
+                elif tuning_strategy=='bayes:gbrt':
+                    optimizer={'base_estimator': 'GBRT'}
+                else:
+                    optimizer={'base_estimator': 'GP'}
+                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', cv=inner_kfold, n_iter=tuning_iter,verbose=0, optimizer_kwargs=optimizer)
             elif tuning_strategy=='randomized':
                 grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', refit=True, cv=inner_kfold, n_iter=tuning_iter,verbose=0)
             print('Tuning...')
@@ -197,4 +205,3 @@ class validation:
                                  'AUC']]
         radar_plot = self.create_radar_chart(radar_df=simple_ave_metrics)
         radar_plot.show()
-        

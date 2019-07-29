@@ -348,7 +348,7 @@ class static:
                     smotenc = SMOTENC(categorical_features=cat_index, sampling_strategy='auto',n_jobs=-1)
                     X_smnc, y_smnc = smotenc.fit_sample(X_train, y_train)
                     X_smnc = pd.DataFrame(X_smnc, columns = col)
-                    samples.append(tuple([X_smnc,y_smnc,"SMOTE"]))
+                    samples.append(tuple([X_smnc,y_smnc,"SMOTENC"]))
 
                 elif i in ['smotetl','smote+tl','tlsmote','tl+smote']:
                     smt = SMOTETomek(sampling_strategy='auto',n_jobs=-1)
@@ -378,6 +378,6 @@ class static:
                     oss=OneSidedSelection(sampling_strategy='auto',n_jobs=-1)
                     X_oss, y_oss = oss.fit_sample(X_train,y_train)
                     X_oss = pd.DataFrame(X_oss, columns = col)
-                    samples.append(tuple([X_oss,y_oss,"Neighborhood Cleaning"]))
+                    samples.append(tuple([X_oss,y_oss,"One-Sided Selection"]))
 
         return samples

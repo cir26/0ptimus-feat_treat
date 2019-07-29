@@ -313,7 +313,7 @@ class static:
         return plt
 
     @staticmethod
-    def resampler(sample, X_train, y_train):
+    def resampler(sample, X_train, y_train, encoded_columns=self.encoded):
         col=X_train.columns
         if sample==False:
             samples = [(X_train,y_train,"None")]
@@ -344,7 +344,7 @@ class static:
                     samples.append(tuple([X_sm,y_sm,"SMOTE"]))
 
                 elif i in ['smotenc']:
-                    cat_index = [self.X.columns.get_loc(i) for i in self.encoded]
+                    cat_index = [X_train.columns.get_loc(i) for i in encoded_columns]
                     smotenc = SMOTENC(categorical_features=cat_index, ratio='auto',n_jobs=-1)
                     X_smnc, y_smnc = smotenc.fit_sample(X_train, y_train)
                     X_smnc = pd.DataFrame(X_smnc, columns = col)

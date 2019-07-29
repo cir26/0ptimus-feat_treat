@@ -59,6 +59,8 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         if len(missing_dv)>0:
             self.y = self.y.drop(index=missing_dv)
             self.X = self.X.drop(index=missing_dv)
+            self.y.reset_index(drop=True,inplace=True)
+            self.X.reset_index(drop=True,inplace=True)
             print("The following observations were removed due to missing dependent variable: ", missing_dv, " \n")
 
         # Low variance filter
@@ -173,6 +175,8 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         elif axis==0:
              self.X=self.X.drop(index=index, axis=0)
              self.y=self.y.drop(index=index)
+             self.X.reset_index(drop=True,inplace=True)
+             self.y.reset_index(drop=True,inplace=True)
 
 
     def pcc_filter(self,k):

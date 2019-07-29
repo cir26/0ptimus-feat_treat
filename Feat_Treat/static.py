@@ -369,7 +369,7 @@ class static:
                     samples.append(tuple([X_tl,y_tl,"Tomek link"]))
 
                 elif i in ['neighborhoodcleaning', 'neighborhoodcleaningrule','neighbourhoodcleaning', 'neighbourhoodcleaningrule', 'ncr', 'nc', 'ncl']:
-                    ncl=NeighborhoodCleaningRule(sampling_strategy='auto',n_jobs=-1)
+                    ncl=NeighbourhoodCleaningRule(sampling_strategy='auto',n_jobs=-1)
                     X_ncl, y_ncl = ncl.fit_sample(X_train,y_train)
                     X_ncl = pd.DataFrame(X_ncl, columns = col)
                     samples.append(tuple([X_ncl,y_ncl,"Neighborhood Cleaning"]))

@@ -87,6 +87,8 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         # return base rate
         if (self.y.dtype != 'float64' and self.y.dtype != 'int64'):
             y_class_count = self.y.astype(str)
+        else:
+            y_class_count = self.y
         unique_elements, counts_elements = np.unique(y_class_count, return_counts=True)
         DV_classes_df = pd.DataFrame({'Class': unique_elements,
                                       'Count': counts_elements})

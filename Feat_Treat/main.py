@@ -54,8 +54,8 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
 
 
         # remove observations where DV is missing
-        mask = y.isnull()
-        missing_dv = [i for i in range(0, y.shape[0]) if mask[i]==True]
+        mask = self.y.isnull()
+        missing_dv = [i for i in range(0, self.y.shape[0]) if mask[i]==True]
         if len(missing_dv)>0:
             self.y = self.y.drop(index=missing_dv)
             self.X = self.X.drop(index=missing_dv)
@@ -83,8 +83,8 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
 
 
         # return base rate
-        if y.dtype=='object' or y.dtype=="dtype('O')":
-            y_class_count = y.astype(str)
+        if self.y.dtype=='object' or self.y.dtype=="dtype('O')":
+            y_class_count = self.y.astype(str)
         unique_elements, counts_elements = np.unique(y_class_count, return_counts=True)
         DV_classes_df = pd.DataFrame({'Class': unique_elements,
                                       'Count': counts_elements})

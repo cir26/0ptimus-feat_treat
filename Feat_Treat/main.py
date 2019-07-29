@@ -52,8 +52,10 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         self.metrics='No metrics available'
         self.hyperparameters='No hyperparameters available'
 
-        mask = self.y.isnull()
-        missing_dv = [i for i in range(0, self.y.shape[0]) if mask[i]==True]
+
+        # remove observations where DV is missing
+        mask = y.isnull()
+        missing_dv = [i for i in range(0, y.shape[0]) if mask[i]==True]
         if len(missing_dv)>0:
             self.y = self.y.drop(index=missing_dv)
             self.X = self.X.drop(index=missing_dv)

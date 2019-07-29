@@ -232,14 +232,16 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         if(strategy=='dummy'):
             self.X=pd.get_dummies(self.X, columns=cat_col)
             cat_col = [i for i in cat_col if i not in self.encoded]
-            self.encoded.append(cat_col)
+            for i in cat_col:
+                self.encoded.append(i)
         elif strategy == None or strategy == 'label':
             if len(cat_col)>0:
                 le = preprocessing.LabelEncoder()
                 for col in cat_col:
                     self.X[col]=le.fit_transform(self.X[col])
                 cat_col = [i for i in cat_col if i not in self.encoded]
-                self.encoded.append(cat_col)
+                for i in cat_col:
+                    self.encoded.append(i)
             else:
                 print("No categorical variables identified in data set")
 

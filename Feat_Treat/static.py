@@ -338,26 +338,26 @@ class static:
                     samples.append(tuple([X_ros,y_ros,"Random over sampling"]))
 
                 elif i in ['smote']:
-                    smote = SMOTE(ratio='minority',n_jobs=-1)
+                    smote = SMOTE(sampling_strategy='minority',n_jobs=-1)
                     X_sm, y_sm = smote.fit_sample(X_train, y_train)
                     X_sm = pd.DataFrame(X_sm, columns = col)
                     samples.append(tuple([X_sm,y_sm,"SMOTE"]))
 
                 elif i in ['smotenc']:
                     cat_index = [X_train.columns.get_loc(i) for i in encoded_columns]
-                    smotenc = SMOTENC(categorical_features=cat_index, ratio='auto',n_jobs=-1)
+                    smotenc = SMOTENC(categorical_features=cat_index, sampling_strategy='auto',n_jobs=-1)
                     X_smnc, y_smnc = smotenc.fit_sample(X_train, y_train)
                     X_smnc = pd.DataFrame(X_smnc, columns = col)
                     samples.append(tuple([X_smnc,y_smnc,"SMOTE"]))
 
                 elif i in ['smotetl','smote+tl','tlsmote','tl+smote']:
-                    smt = SMOTETomek(ratio='auto',n_jobs=-1)
+                    smt = SMOTETomek(sampling_strategy='auto',n_jobs=-1)
                     X_smt, y_smt = smt.fit_sample(X_train, y_train)
                     X_smt = pd.DataFrame(X_smt, columns = col)
                     samples.append(tuple([X_smt,y_smt,"SMOTE + TL"]))
 
                 elif i in ['smoteenn','smotenn','ennsmote','smote+enn','enn+smote']:
-                    sme = SMOTEENN(ratio='auto',n_jobs=-1)
+                    sme = SMOTEENN(sampling_strategy='auto',n_jobs=-1)
                     X_sme, y_sme = sme.fit_sample(X_train, y_train)
                     X_sme = pd.DataFrame(X_sme, columns = col)
                     samples.append(tuple([X_sme,y_sme,"SMOTE + ENN"]))

@@ -52,6 +52,13 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         self.metrics='No metrics available'
         self.hyperparameters='No hyperparameters available'
 
+        mask = self.y.isnull()
+        missing_dv = [i for i in range(0, self.y.shape[0]) if mask[i]==True]
+        if len(missing_dv)>0:
+            self.y = self.y.drop(index=missing_dv)
+            self.X = self.X.drop(index=missing_dv)
+            print("The following observations were removed due to missing dependent variable: ", missing_dv)
+
         # Low variance filter
         # check variance of each column
         # remove column if variance is less than var_threshold

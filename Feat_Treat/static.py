@@ -313,7 +313,7 @@ class static:
         return plt
 
     @staticmethod
-    def resampler(sample, X_train, y_train, encoded_columns=self.encoded):
+    def resampler(sample, X_train, y_train, encoded_columns):
         col=X_train.columns
         if sample==False:
             samples = [(X_train,y_train,"None")]

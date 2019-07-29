@@ -56,7 +56,7 @@ class validation:
         elif tuning_strategy =='randomized':
             pass
 
-        samples = self.resampler(sample=sample,X_train=X_train,y_train=y_train)
+        samples = self.resampler(sample=sample,X_train=X_train,y_train=y_train,encoded_columns=self.encoded)
 
 #       tune and test
         N = len(samples)
@@ -156,7 +156,7 @@ class validation:
         for j in range(0,iterations):
 #           split into training and test sets
             X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=random[j])
-            samples = self.resampler(sample=sample,X_train=X_train,y_train=y_train)
+            samples = self.resampler(sample=sample,X_train=X_train,y_train=y_train,encoded_columns=self.encoded)
             N=len(samples)
             for i in range(0,N):
                 if isinstance(params, list)==True:

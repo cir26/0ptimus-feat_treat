@@ -326,56 +326,56 @@ class static:
             for i in sample:
                 i=''.join(i.split()).lower()
                 if i in ['rus','randomundersampling','randomundersample']:
-                    rus = RandomUnderSampler()
+                    rus = RandomUnderSampler(sampling_strategy='auto',n_jobs=-1)
                     X_rus, y_rus = rus.fit_sample(X_train, y_train)
                     X_rus = pd.DataFrame(X_rus, columns = col)
                     samples.append(tuple([X_rus,y_rus,"Random under sampling"]))
 
                 elif i in ['ros','randomoversampling','randomoversample']:
-                    ros = RandomOverSampler()
+                    ros = RandomOverSampler(sampling_strategy='auto',n_jobs=-1)
                     X_ros, y_ros = ros.fit_sample(X_train, y_train)
                     X_ros = pd.DataFrame(X_ros, columns = col)
                     samples.append(tuple([X_ros,y_ros,"Random over sampling"]))
 
                 elif i in ['smote']:
-                    smote = SMOTE(ratio='minority')
+                    smote = SMOTE(ratio='minority',n_jobs=-1)
                     X_sm, y_sm = smote.fit_sample(X_train, y_train)
                     X_sm = pd.DataFrame(X_sm, columns = col)
                     samples.append(tuple([X_sm,y_sm,"SMOTE"]))
 
                 elif i in ['smotenc']:
                     cat_index = [self.X.columns.get_loc(i) for i in self.encoded]
-                    smotenc = SMOTENC(categorical_features=cat_index, ratio='auto')
+                    smotenc = SMOTENC(categorical_features=cat_index, ratio='auto',n_jobs=-1)
                     X_smnc, y_smnc = smotenc.fit_sample(X_train, y_train)
                     X_smnc = pd.DataFrame(X_smnc, columns = col)
                     samples.append(tuple([X_smnc,y_smnc,"SMOTE"]))
 
                 elif i in ['smotetl','smote+tl','tlsmote','tl+smote']:
-                    smt = SMOTETomek(ratio='auto')
+                    smt = SMOTETomek(ratio='auto',n_jobs=-1)
                     X_smt, y_smt = smt.fit_sample(X_train, y_train)
                     X_smt = pd.DataFrame(X_smt, columns = col)
                     samples.append(tuple([X_smt,y_smt,"SMOTE + TL"]))
 
                 elif i in ['smoteenn','smotenn','ennsmote','smote+enn','enn+smote']:
-                    sme = SMOTEENN(ratio='auto')
+                    sme = SMOTEENN(ratio='auto',n_jobs=-1)
                     X_sme, y_sme = sme.fit_sample(X_train, y_train)
                     X_sme = pd.DataFrame(X_sme, columns = col)
                     samples.append(tuple([X_sme,y_sme,"SMOTE + ENN"]))
 
                 elif i in ['tl','tomek','tomeklink','tomeklinks']:
-                    tl=TomekLinks(sampling_strategy='all')
+                    tl=TomekLinks(sampling_strategy='all',n_jobs=-1)
                     X_tl, y_tl = tl.fit_sample(X_train,y_train)
                     X_tl = pd.DataFrame(X_tl, columns = col)
                     samples.append(tuple([X_tl,y_tl,"Tomek link"]))
 
                 elif i in ['neighborhoodcleaning', 'neighborhoodcleaningrule','neighbourhoodcleaning', 'neighbourhoodcleaningrule', 'ncr', 'nc', 'ncl']:
-                    ncl=NeighborhoodCleaningRule(sampling_strategy='auto')
+                    ncl=NeighborhoodCleaningRule(sampling_strategy='auto',n_jobs=-1)
                     X_ncl, y_ncl = ncl.fit_sample(X_train,y_train)
                     X_ncl = pd.DataFrame(X_ncl, columns = col)
                     samples.append(tuple([X_ncl,y_ncl,"Neighborhood Cleaning"]))
 
                 elif i in ['onesidedselection', 'oss', 'one-sidedselection']:
-                    oss=(sampling_strategy='auto')
+                    oss=OneSidedSelection(sampling_strategy='auto',n_jobs=-1)
                     X_oss, y_oss = oss.fit_sample(X_train,y_train)
                     X_oss = pd.DataFrame(X_oss, columns = col)
                     samples.append(tuple([X_oss,y_oss,"Neighborhood Cleaning"]))

@@ -171,7 +171,8 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                     for i in index:
                         self.X[i].fillna(strategy,inplace=True)
         elif axis==0:
-             self.X.drop(index=index, axis=0,inplace=True)
+             self.X=self.X.drop(index=index, axis=0)
+             self.y=self.y.drop(index=index)
 
 
     def pcc_filter(self,k):

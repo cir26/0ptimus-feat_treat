@@ -30,7 +30,7 @@ class static:
     @staticmethod
     def performance_metrics(y_test, probs, pred_threshold=0.5, classes=[0, 1], average='binary', sample_method_label='None', index=0, verbose=True):
 #       returns dataframe of various performance metrics
-        log_loss = log_loss(y_test, probs)
+        logloss = log_loss(y_test, probs)
         if average=='binary':
             probs1 = probs[:,1]
             preds=[]
@@ -116,7 +116,7 @@ class static:
             print('G1 score:          ', g1)
             print('Cohen kappa score: ', ck)
             print(' ')
-            print("Log loss: ", log_loss)
+            print("Log loss: ", logloss)
             print('MCC:               ', mcc)
             print("AUC:               ", auc_score, "\n")
         else:
@@ -134,7 +134,7 @@ class static:
                     'F2' : f2,
                     'G1' : g1,
                     'Cohen kappa' : ck,
-                    "Log loss" : log_loss,
+                    "Log loss" : logloss,
                     'MCC' : mcc,
                     "AUC" : auc_score},index=[index])
         df=df.fillna(0)

@@ -84,7 +84,8 @@ class static:
                     decision=choice(decision[0])
                 else:
                     decision=decision[0][0]
-                preds.append(classes[decision])\
+                preds.append(classes[decision])
+            
             specificity=1
             neg_pred= 1
             g1=1

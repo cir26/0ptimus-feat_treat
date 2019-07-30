@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from math import floor, ceil, pi
 import copy
-from random import randint
+from random import randint,choice
 # scikit tools
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
@@ -14,7 +14,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import RFECV
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
+from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
@@ -28,34 +28,81 @@ class static:
 
 
     @staticmethod
-    def performance_metrics(y_test, probs, pred_threshold=0.5, sample_method_label='None', index=0, verbose=True):
+    def performance_metrics(y_test, probs, pred_threshold=0.5, average='binary', sample_method_label='None', index=0, verbose=True):
 #       returns dataframe of various performance metrics
-        probs1 = probs[:,1]
-        preds=[]
-        for prediction in probs1:
-            if prediction >= pred_threshold:
-                preds.append(1)
+        log_loss = log_loss(y_test, probs)
+        if average=='binary':
+            probs1 = probs[:,1]
+            preds=[]
+            for prediction in probs1:
+                if prediction >= pred_threshold:
+                    preds.append(1)
+                else:
+                    preds.append(0)
+            fpr, tpr, threshold = roc_curve(y_test, probs1)
+            auc_score = round(auc(fpr,tpr),5)
+            prec, rec, threshold_pr = precision_recall_curve(y_test, probs1)
+            auc_pr_curve = round(auc(rec, prec),5)
+            if verbose == True:
+            #-------- ROC CURVE --------------
+                plt1.figure()
+                lw=2
+                plt1.plot(fpr, tpr, color='darkorange',lw=lw, label='ROC curve (area = {})'.format(auc_score))
+                plt1.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+                plt1.xlim([0.0, 1.0])
+                plt1.ylim([0.0, 1.05])
+                plt1.xlabel('False Positive Rate')
+                plt1.ylabel('True Positive Rate')
+                plt1.title(' Sampling: {} \n Receiver Operating Characteristic'.format(sample_method_label))
+                plt1.legend(loc="lower right")
+                plt1.show()
+            #-------- Precision-Recall CURVE --------------
+                unique_elements, counts_elements = np.unique(y_test, return_counts=True)
+                no_skill=counts_elements[1]/sum(counts_elements)
+                plt2.figure()
+                plt2.plot(rec, prec, color='darkred',lw=lw, label='Precision-Recall curve (area = {})'.format(auc_pr_curve))
+                plt2.plot([0, 1], [no_skill, no_skill], color='navy', lw=lw, linestyle='--')
+                plt2.xlim([0.0, 1.0])
+                plt2.ylim([0.0, 1.05])
+                plt2.xlabel('Recall')
+                plt2.ylabel('Precision')
+                plt2.title(' Sampling: {} \n Precision-Recall Curve'.format(sample_method_label))
+                plt2.legend(loc="lower right")
+                plt2.show()
+                print("\n ")
             else:
-                preds.append(0)
-        fpr, tpr, threshold = roc_curve(y_test, probs1)
-        auc_score = round(auc(fpr,tpr),5)
-        prec, rec, threshold_pr = precision_recall_curve(y_test, probs1)
-        auc_pr_curve = round(auc(rec, prec),5)
+                pass
+        else:
+            preds=[]
+            for i in range(0,len(y_test)):
+                decision = np.where(probs[i] == np.amax(probs[i]))
+                if len(decision[0])>1:
+                    decision=choice(decision[0])
+                else:
+                    decision=decision[0][0]
+                preds.append(decision)
+            auc_score = roc_auc_score(y_test,probs,average=average)
+
         conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
         accuracy = round(accuracy_score(y_test, preds),5)
         ck = round(cohen_kappa_score(y_test,preds),5)
-        brier = round(brier_score_loss(y_test,probs1) ,5)
-        f1 = round(f1_score(y_test, preds),5)
-    #               jaccard = jaccard_score(y_test, preds)
-        recall = round(recall_score(y_test, preds),5)
-        precision = round(precision_score(y_test, preds),5)
         mcc = round(matthews_corrcoef(y_test, preds),5)
-        specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
-        neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
+        f1 = round(f1_score(y_test, preds,average=average),5)
+        recall = round(recall_score(y_test, preds, average=average),5)
+        precision = round(precision_score(y_test, preds,average=average),5)
         f2=round(5*((precision*recall)/((4*precision)+recall)),5)
-        g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
-        conf_sum =round(precision+recall+specificity+neg_pred,5)
-    #               rmse = np.sqrt(mean_squared_error(y_test, preds))
+
+        #------------------------fix algo------------------------------------
+        # specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
+        # neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
+        # g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
+        # conf_sum =round(precision+recall+specificity+neg_pred,5)
+        specificity=1
+        neg_pred= 1
+        g1=1
+        conf_sum =1
+        #--------------------------------------------------------------------
+
         if verbose==True:
             print("Accuracy:          ", accuracy)
             print('Precision:         ', precision)
@@ -68,41 +115,13 @@ class static:
             print('F2 score:          ', f2)
             print('G1 score:          ', g1)
             print('Cohen kappa score: ', ck)
-        #               print("RMSE:              ", rmse)
             print(' ')
-        #               print("Jaccard score:     ", jaccard)
-            print("Brier score loss:  ", brier)
+            print("Log loss: ", log_loss)
             print('MCC:               ', mcc)
             print("AUC:               ", auc_score, "\n")
-        #-------- ROC CURVE --------------
-            plt.figure()
-            lw=2
-            plt.plot(fpr, tpr, color='darkorange',lw=lw, label='ROC curve (area = {})'.format(auc_score))
-            plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-            plt.xlim([0.0, 1.0])
-            plt.ylim([0.0, 1.05])
-            plt.xlabel('False Positive Rate')
-            plt.ylabel('True Positive Rate')
-            plt.title(' Sampling: {} \n Receiver Operating Characteristic'.format(sample_method_label))
-            plt.legend(loc="lower right")
-            plt.show()
-        #-----------------------------------
-        #-------- Precision-Recall CURVE --------------
-            unique_elements, counts_elements = np.unique(y_test, return_counts=True)
-            no_skill=counts_elements[1]/sum(counts_elements)
-            plt.figure()
-            plt.plot(rec, prec, color='darkred',lw=lw, label='Precision-Recall curve (area = {})'.format(auc_pr_curve))
-            plt.plot([0, 1], [no_skill, no_skill], color='navy', lw=lw, linestyle='--')
-            plt.xlim([0.0, 1.0])
-            plt.ylim([0.0, 1.05])
-            plt.xlabel('Recall')
-            plt.ylabel('Precision')
-            plt.title(' Sampling: {} \n Precision-Recall Curve'.format(sample_method_label))
-            plt.legend(loc="lower right")
-            plt.show()
-            print("\n ","\n ","\n ")
         else:
             pass
+
 #       update self.metrics data
         df=pd.DataFrame({"Sampling" : sample_method_label,
                     "Accuracy" : accuracy,
@@ -115,9 +134,7 @@ class static:
                     'F2' : f2,
                     'G1' : g1,
                     'Cohen kappa' : ck,
-#                   "RMSE" : rmse,
-#                   "Jaccard score" : jaccard,
-                    "Brier score loss" : brier,
+                    "Log loss" : log_loss,
                     'MCC' : mcc,
                     "AUC" : auc_score},index=[index])
         df=df.fillna(0)

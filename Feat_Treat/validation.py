@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from math import floor, ceil, pi
 import copy
-from random import randint
+from random import randint, choice
 # scikit tools
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
@@ -14,7 +14,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import RFECV
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
+from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
@@ -72,9 +72,7 @@ class validation:
                                            'F2',
                                            'G1',
                                            'Cohen kappa',
-#                                              "RMSE" : rmse,
-#                                              "Jaccard score" : jaccard,
-                                           "Brier score loss",
+                                           "Log loss",
                                            'MCC',
                                            "AUC"])
 #       copy uninstantiated model for replacement within loop
@@ -111,7 +109,11 @@ class validation:
             model.fit(samples[i][0],samples[i][1])
             probs = model.predict_proba(X_test[samples[i][0].columns])
             #return performance metrics
-            df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
+            if len(self.y.value_counts)==2:
+                average='binary'
+            else:
+                average='micro'
+            df = self.performance_metrics(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
             self.metrics=self.metrics.append(df)
 #           end of loop
         self.hyperparameters=best_param
@@ -132,6 +134,11 @@ class validation:
 
     def multi_test_split_validation(self, model, params, iterations, sample = False, test_size = 0.2):
 #       use to validate best hyperparameters by averaging results of multiple random test split iterations
+#       first check if classification is binary or multiclass
+        if len(self.y.value_counts)==2:
+            average='binary'
+        else:
+            average='micro'
 #       initialize metrics dataframe
         metrics_log=pd.DataFrame(columns=["Sampling",
                                            "Accuracy",
@@ -144,9 +151,7 @@ class validation:
                                            'F2',
                                            'G1',
                                            'Cohen kappa',
-#                                              "RMSE" : rmse,
-#                                              "Jaccard score" : jaccard,
-                                           "Brier score loss",
+                                           "Log loss",
                                            'MCC',
                                            "AUC"])
         model_rep=model
@@ -168,7 +173,7 @@ class validation:
                             model=model_rep(**param)
                             model.fit(samples[i][0],samples[i][1])
                             probs = model.predict_proba(X_test[samples[i][0].columns])
-                            df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
+                            df = self.performance_metrics(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                             metrics_log=metrics_log.append(df)
                             fitted=fitted+1
                         else:
@@ -179,7 +184,7 @@ class validation:
                         model=model_rep(**param)
                         model.fit(samples[i][0],samples[i][1])
                         probs = model.predict_proba(X_test[samples[i][0].columns])
-                        df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
+                        df = self.performance_metrics(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                         metrics_log=metrics_log.append(df)
                     else:
                         pass
@@ -188,7 +193,7 @@ class validation:
                     model=model_rep(**params)
                     model.fit(samples[i][0],samples[i][1])
                     probs = model.predict_proba(X_test[samples[i][0].columns])
-                    df = self.performance_metrics(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
+                    df = self.performance_metrics(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                     metrics_log=metrics_log.append(df)
 #       return dataframe of average column scores of each sampling method
         ave_metrics = metrics_log.groupby("Sampling").mean()

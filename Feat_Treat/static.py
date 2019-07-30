@@ -89,8 +89,9 @@ class static:
             neg_pred= 1
             g1=1
             conf_sum =1
+            #auc_score = roc_auc_score(y_test,preds,average=average)
 
-        auc_score = roc_auc_score(y_test,preds,average=average)
+
         conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
         accuracy = round(accuracy_score(y_test, preds),5)
         ck = round(cohen_kappa_score(y_test,preds),5)

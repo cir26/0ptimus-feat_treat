@@ -252,7 +252,7 @@ class static:
                               random_state=random_state)
 
         #elif("Bagging" in str(model_rep)):
-    elif("MLP" in str(model)):
+        elif("MLP" in str(model)):
 #           default hyperparameter testing range
             neurons = [i for i in range(floor(col_length*0.05),floor(col_length*0.9),3)]
             hidden_layer_sizes = [(i,)*j for i in neurons for j in range(1,4)]

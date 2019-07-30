@@ -59,9 +59,13 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         if len(missing_dv)>0:
             self.y = self.y.drop(index=missing_dv)
             self.X = self.X.drop(index=missing_dv)
-            self.y.reset_index(drop=True,inplace=True)
-            self.X.reset_index(drop=True,inplace=True)
+            self.y = self.y.reset_index(drop=True)
+            self.X = self.X.reset_index(drop=True)
             print("The following observations were removed due to missing dependent variable: ", missing_dv, " \n")
+
+        # remove columns where each observation is unique (id column):
+        ids = [i for i in self.X.columns if len(self.X[i].value_counts()) == self.X.shape[0]]
+        self.X = self.X.drop(columns=ids)
 
         # Low variance filter
         # check variance of each column
@@ -73,6 +77,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 if np.var(self.X[col]) < var_threshold:
                     drop.append(col)
         self.X=self.X.drop(columns=drop)
+
         # GET TO KNOW YOUR DATA SET
         # return dataframe indices for categorical datatypes
         obj = [self.X.columns.get_loc(i) for i in self.X.columns if self.X[i].dtype == 'object']
@@ -117,7 +122,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
             percent_na = [percent_missing[i] for i in range(0,num_col) if percent_missing[i]>percent_threshold]
             missing_value_df = pd.DataFrame({'column_name': column_name,
                                              'percent_na': percent_na})
-            missing_value_df.sort_values('percent_na', inplace=True)
+            missing_value_df = missing_value_df.sort_values('percent_na')
             print(missing_value_df, "\n ")
             self.na_col=column_name
             print("Index stored in: self.na_col")
@@ -130,7 +135,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
             percent_na = [percent_missing[i] for i in range(0,num_obs) if percent_missing[i]>percent_threshold]
             missing_value_df = pd.DataFrame({'row_index': row_index,
                                              'percent_na': percent_na})
-            missing_value_df.sort_values('percent_na', inplace=True)
+            missing_value_df = missing_value_df.sort_values('percent_na')
             print(missing_value_df, "\n ")
             self.na_row=row_index
             print("Index stored in: self.na_row")
@@ -157,8 +162,8 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                     for i in index:
                         mode = self.X[i].mode()[0]
                         self.X[i].fillna(mode,inplace=True)
-                elif strategy1=='remove':
-                    self.X.drop(columns=index,inplace=True)
+                elif strategy1=='remove' or strategy1=='drop':
+                    self.X = self.X.drop(columns=index)
                 elif strategy1=='random':
                     for i in index:
                         uniques = np.unique(self.X[i])
@@ -175,10 +180,10 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                     for i in index:
                         self.X[i].fillna(strategy,inplace=True)
         elif axis==0:
-             self.X=self.X.drop(index=index, axis=0)
-             self.y=self.y.drop(index=index)
-             self.X.reset_index(drop=True,inplace=True)
-             self.y.reset_index(drop=True,inplace=True)
+             self.X = self.X.drop(index=index, axis=0)
+             self.y = self.y.drop(index=index)
+             self.X = self.X.reset_index(drop=True)
+             self.y = self.y.reset_index(drop=True)
 
 
     def pcc_filter(self,k):
@@ -230,13 +235,12 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
             for j in i[1].index:
                 if j not in ignore:
                     feat_remove.append(j)
-
         feat_remove=set(feat_remove)
         self.X=self.X.drop(columns=feat_remove)
-        # check which columns are kept
-        keep_col=self.X.columns
-        print("columns remaining: ",keep_col)
-        print(len(keep_col), " columns")
+        # check which columns were dropped
+        print(len(feat_remove), " columns dropped")
+        print("columns dropped: ",feat_remove)
+
 
     def check_cat(self):
         categorical_columns=[i for i in self.X.columns if (self.X[i].dtype != 'float64' and self.X[i].dtype != 'int64')]

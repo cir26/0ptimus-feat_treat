@@ -96,7 +96,7 @@ class validation:
                     optimizer={'base_estimator': 'GBRT'}
                 else:
                     optimizer={'base_estimator': 'GP'}
-                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', cv=inner_kfold, n_iter=tuning_iter,verbose=0, optimizer_kwargs=optimizer)
+                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, n_points=4, pre_dispatch='2*n_jobs', cv=inner_kfold, n_iter=tuning_iter,verbose=0, optimizer_kwargs=optimizer)
             elif tuning_strategy=='randomized':
                 grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', refit=True, cv=inner_kfold, n_iter=tuning_iter,verbose=0)
             print('Tuning...')
@@ -192,7 +192,7 @@ class validation:
                     metrics_log=metrics_log.append(df)
 #       return dataframe of average column scores of each sampling method
         ave_metrics = metrics_log.groupby("Sampling").mean()
-        ave_metrics.reset_index(level="Sampling", inplace=True)
+        ave_metrics = ave_metrics.reset_index(level="Sampling")
         self.metrics = ave_metrics
         simple_ave_metrics = ave_metrics[['Sampling',
                                  'Accuracy',

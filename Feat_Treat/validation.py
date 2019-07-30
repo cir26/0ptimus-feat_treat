@@ -34,7 +34,7 @@ class validation:
 #       instantiate cv stratified fold
         inner_kfold = StratifiedKFold(n_splits=skfold, shuffle=True, random_state=self.random_state)
         #outer_kfold = StratifiedKFold(n_splits=skfold, shuffle=True, random_state=self.random_state)
-        if("multilayer_perceptron" in str(model)):
+        if("MLP" in str(model)):
             #standardize data sets
             scaler = StandardScaler().fit(X_train)
             X_train = pd.DataFrame(scaler.transform(X_train), columns=col, index=X_train.index)
@@ -94,7 +94,7 @@ class validation:
                     optimizer={'base_estimator': 'GBRT'}
                 else:
                     optimizer={'base_estimator': 'GP'}
-                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, n_points=4, pre_dispatch='2*n_jobs', cv=inner_kfold, n_iter=tuning_iter,verbose=0, optimizer_kwargs=optimizer)
+                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', cv=inner_kfold, n_iter=tuning_iter,verbose=0, optimizer_kwargs=optimizer)
             elif tuning_strategy=='randomized':
                 grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', refit=True, cv=inner_kfold, n_iter=tuning_iter,verbose=0)
             print('Tuning...')
@@ -108,12 +108,13 @@ class validation:
             model=model_rep(**best_param[i][1])
             model.fit(samples[i][0],samples[i][1])
             probs = model.predict_proba(X_test[samples[i][0].columns])
+            classes = model.classes_
             #return performance metrics
-            if len(self.y.value_counts)==2:
+            if len(self.y.value_counts())==2:
                 average='binary'
             else:
                 average='micro'
-            df = self.performance_metrics(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
+            df = self.performance_metrics(y_test=y_test,probs=probs, classes=classes, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
             self.metrics=self.metrics.append(df)
 #           end of loop
         self.hyperparameters=best_param
@@ -135,7 +136,7 @@ class validation:
     def multi_test_split_validation(self, model, params, iterations, sample = False, test_size = 0.2):
 #       use to validate best hyperparameters by averaging results of multiple random test split iterations
 #       first check if classification is binary or multiclass
-        if len(self.y.value_counts)==2:
+        if len(self.y.value_counts())==2:
             average='binary'
         else:
             average='micro'
@@ -173,7 +174,8 @@ class validation:
                             model=model_rep(**param)
                             model.fit(samples[i][0],samples[i][1])
                             probs = model.predict_proba(X_test[samples[i][0].columns])
-                            df = self.performance_metrics(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
+                            classes = model.classes_
+                            df = self.performance_metrics(y_test=y_test,probs=probs, classes=classes, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                             metrics_log=metrics_log.append(df)
                             fitted=fitted+1
                         else:
@@ -184,7 +186,8 @@ class validation:
                         model=model_rep(**param)
                         model.fit(samples[i][0],samples[i][1])
                         probs = model.predict_proba(X_test[samples[i][0].columns])
-                        df = self.performance_metrics(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
+                        classes = model.classes_
+                        df = self.performance_metrics(y_test=y_test,probs=probs, classes=classes, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                         metrics_log=metrics_log.append(df)
                     else:
                         pass
@@ -193,7 +196,8 @@ class validation:
                     model=model_rep(**params)
                     model.fit(samples[i][0],samples[i][1])
                     probs = model.predict_proba(X_test[samples[i][0].columns])
-                    df = self.performance_metrics(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
+                    classes = model.classes_
+                    df = self.performance_metrics(y_test=y_test,probs=probs, classes=classes, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=(N*j)+i, verbose=False)
                     metrics_log=metrics_log.append(df)
 #       return dataframe of average column scores of each sampling method
         ave_metrics = metrics_log.groupby("Sampling").mean()

@@ -28,7 +28,7 @@ class static:
 
 
     @staticmethod
-    def performance_metrics(y_test, probs, pred_threshold=0.5, average='binary', sample_method_label='None', index=0, verbose=True):
+    def performance_metrics(y_test, probs, pred_threshold=0.5, classes=[0, 1], average='binary', sample_method_label='None', index=0, verbose=True):
 #       returns dataframe of various performance metrics
         log_loss = log_loss(y_test, probs)
         if average=='binary':
@@ -80,7 +80,7 @@ class static:
                     decision=choice(decision[0])
                 else:
                     decision=decision[0][0]
-                preds.append(decision)
+                preds.append(classes[decision])
             auc_score = roc_auc_score(y_test,probs,average=average)
 
         conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
@@ -252,7 +252,7 @@ class static:
                               random_state=random_state)
 
         #elif("Bagging" in str(model_rep)):
-        elif("multilayer_perceptron" in str(model)):
+    elif("MLP" in str(model)):
 #           default hyperparameter testing range
             neurons = [i for i in range(floor(col_length*0.05),floor(col_length*0.9),3)]
             hidden_layer_sizes = [(i,)*j for i in neurons for j in range(1,4)]

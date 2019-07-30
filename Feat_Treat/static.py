@@ -43,6 +43,10 @@ class static:
             auc_score = round(auc(fpr,tpr),5)
             prec, rec, threshold_pr = precision_recall_curve(y_test, probs1)
             auc_pr_curve = round(auc(rec, prec),5)
+            specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
+            neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
+            g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
+            conf_sum =round(precision+recall+specificity+neg_pred,5)
             if verbose == True:
             #-------- ROC CURVE --------------
                 plt1.figure()
@@ -80,9 +84,13 @@ class static:
                     decision=choice(decision[0])
                 else:
                     decision=decision[0][0]
-                preds.append(classes[decision])
-            auc_score = roc_auc_score(y_test,probs,average=average)
+                preds.append(classes[decision])\
+            specificity=1
+            neg_pred= 1
+            g1=1
+            conf_sum =1
 
+        auc_score = roc_auc_score(y_test,preds,average=average)
         conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
         accuracy = round(accuracy_score(y_test, preds),5)
         ck = round(cohen_kappa_score(y_test,preds),5)
@@ -97,10 +105,6 @@ class static:
         # neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
         # g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
         # conf_sum =round(precision+recall+specificity+neg_pred,5)
-        specificity=1
-        neg_pred= 1
-        g1=1
-        conf_sum =1
         #--------------------------------------------------------------------
 
         if verbose==True:

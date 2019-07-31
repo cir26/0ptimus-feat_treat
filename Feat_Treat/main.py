@@ -63,10 +63,6 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
             self.X = self.X.reset_index(drop=True)
             print("The following observations were removed due to missing dependent variable: ", missing_dv, " \n")
 
-        # remove columns where each observation is unique (id column):
-        ids = [i for i in self.X.columns if len(self.X[i].value_counts()) == self.X.shape[0]]
-        self.X = self.X.drop(columns=ids)
-
         # Low variance filter
         # check variance of each column
         # remove column if variance is less than var_threshold
@@ -260,6 +256,10 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 else:
                     pass
 
+    def drop_ids(self):
+        # remove columns where each observation is unique (id column):
+        ids = [i for i in self.X.columns if len(self.X[i].unique()) == self.X.shape[0]]
+        self.X = self.X.drop(columns=ids)
 
     def encode(self, strategy=None, cat_col=None):
         if cat_col==None:

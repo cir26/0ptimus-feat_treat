@@ -6,9 +6,10 @@ from scipy import stats
 from math import floor, ceil, pi
 import copy
 from random import randint, choice
+from itertools import cycle
 # scikit tools
 from sklearn import preprocessing
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectKBest
@@ -16,6 +17,7 @@ from sklearn.feature_selection import RFECV
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
+from sklearn.multiclass import OneVsRestClassifier
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 # sampling tools
@@ -31,6 +33,7 @@ class validation:
 #       test set will remain untouched until making predictions with tuned model
         col = X_train.columns
         col_length=len(X_train.columns)
+        num_classes=len(np.unique(self.y))
 #       instantiate cv stratified fold
         inner_kfold = StratifiedKFold(n_splits=skfold, shuffle=True, random_state=self.random_state)
         #outer_kfold = StratifiedKFold(n_splits=skfold, shuffle=True, random_state=self.random_state)
@@ -48,7 +51,7 @@ class validation:
             pass
 #       check for bayes or random search
         tuning_strategy=''.join(tuning_strategy.split()).lower()
-        if tuning_strategy=='bayes':
+        if tuning_strategy[:5]=='bayes':
             # unpack hyperparameters
             param_grid_cat = {k: v for k, v in param_grid.items() if isinstance(v,Categorical)==True or k=='n_jobs' or k=='random_state'}
             param_grid_num = {k:(min(v),max(v)) for k,v in param_grid.items() if k not in param_grid_cat}
@@ -105,7 +108,12 @@ class validation:
 #           Train model
             #model = grid_search.best_estimator_
             del grid_results
-            model=model_rep(**best_param[i][1])
+            if num_classes > 2:
+                y_test=label_binarize(y_test, classes=np.unique(self.y))
+                y_train=label_binarize(y_train, classes=np.unique(self.y))
+                model=OneVsRestClassifier(model_rep(**best_param[i][1]))
+            else:
+                model=model_rep(**best_param[i][1])
             model.fit(samples[i][0],samples[i][1])
             probs = model.predict_proba(X_test[samples[i][0].columns])
             classes = model.classes_

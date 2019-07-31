@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from math import floor, ceil, pi
 import copy
-from random import randint,choice
+from random import randint, choice
+from itertools import cycle
 # scikit tools
 from sklearn import preprocessing
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectKBest
@@ -16,6 +17,7 @@ from sklearn.feature_selection import RFECV
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
+from sklearn.multiclass import OneVsRestClassifier
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 # sampling tools
@@ -30,8 +32,9 @@ class static:
     @staticmethod
     def performance_metrics(y_test, probs, pred_threshold=0.5, classes=[0, 1], average='binary', sample_method_label='None', index=0, verbose=True):
 #       returns dataframe of various performance metrics
+        num_classes=len(classes)
         logloss = log_loss(y_test, probs)
-        if average=='binary':
+        if num_classes==2:
             probs1 = probs[:,1]
             preds=[]
             for prediction in probs1:
@@ -43,6 +46,7 @@ class static:
             auc_score = round(auc(fpr,tpr),5)
             prec, rec, threshold_pr = precision_recall_curve(y_test, probs1)
             auc_pr_curve = round(auc(rec, prec),5)
+            conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
             specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
             neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
             g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
@@ -76,7 +80,41 @@ class static:
                 print("\n ")
             else:
                 pass
-        else:
+        elif num_classes > 2:
+            # Compute ROC curve and ROC area for each class
+            fpr = dict()
+            tpr = dict()
+            roc_auc = dict()
+            for i in range(num_classes):
+                fpr[i], tpr[i], _ = roc_curve(y_test[:, i], probs[:, i])
+                roc_auc[i] = round(auc(fpr[i], tpr[i]),5)
+            # Compute micro-average ROC curve and ROC area
+            fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), probs.ravel())
+            roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),5)
+            plt.figure()
+            lw = 2
+            plt.plot(fpr[2], tpr[2], color='darkorange',
+                     lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])
+            plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('Receiver operating characteristic example')
+            plt.legend(loc="lower right")
+            colors = cycle(['aqua', 'darkorange', 'cornflowerblue', 'red','green'])
+            for i, color in zip(range(num_classes), colors):
+                plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+                         label='ROC curve of class {0} (area = {1:0.2f})'
+                         ''.format(i, roc_auc[i]))
+            plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('Some extension of Receiver operating characteristic to multi-class')
+            plt.legend(loc="lower right")
+            plt.show()
             preds=[]
             for i in range(0,len(y_test)):
                 decision = np.where(probs[i] == np.amax(probs[i]))
@@ -85,7 +123,6 @@ class static:
                 else:
                     decision=decision[0][0]
                 preds.append(classes[decision])
-
             specificity=1
             neg_pred= 1
             g1=1
@@ -93,8 +130,6 @@ class static:
             #auc_score = roc_auc_score(y_test,preds,average=average)
             auc_score = np.nan
 
-
-        conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
         accuracy = round(accuracy_score(y_test, preds),5)
         ck = round(cohen_kappa_score(y_test,preds),5)
         mcc = round(matthews_corrcoef(y_test, preds),5)
@@ -182,7 +217,7 @@ class static:
             booster = Categorical(['gbtree','gblinear','dart'])
             n_estimators = [300,500,700]
             learning_rate = np.random.uniform(0.000001,1,10000)
-            max_depth = np.arange(1,floor(col_length),1)
+            max_depth = np.arange(1,col_length,1)
             gamma = np.random.uniform(0,15,10000)
             reg_alpha = np.random.uniform(0,1,10000)
             reg_lambda = np.random.uniform(0,1,10000)

@@ -19,10 +19,11 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from math import floor, ceil, pi
 import copy
-from random import randint,choice
+from random import randint, choice
+from itertools import cycle
 # scikit tools
 from sklearn import preprocessing
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectKBest
@@ -30,6 +31,7 @@ from sklearn.feature_selection import RFECV
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
+from sklearn.multiclass import OneVsRestClassifier
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 # sampling tools

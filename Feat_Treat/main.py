@@ -255,6 +255,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                     col_names.remove(j)
                 else:
                     pass
+        self.X = self.X[col_reorder]
 
     def drop_ids(self):
         # remove columns where each observation is unique (id column):

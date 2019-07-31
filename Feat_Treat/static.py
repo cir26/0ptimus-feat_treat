@@ -299,7 +299,7 @@ class static:
         # more plots than this becomes confusing
         while (radar_df.shape[0])>4:
             # drop row with lowest AUC score for display purposes
-            low_score_row=[radar_df['AUC'].idxmin()]
+            low_score_row=[radar_df['F1'].idxmax()]
             radar_df = radar_df.drop(index=low_score_row)
             radar_df = radar_df.reset_index(drop=True)
         # ------- RADAR CHARTS PART 1: Create background

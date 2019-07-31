@@ -208,6 +208,7 @@ class validation:
                                  'F1',
                                  'G1',
                                  'Cohen kappa',
+                                 'Log Loss',
                                  'MCC',
                                  'AUC']]
         radar_plot = self.create_radar_chart(radar_df=simple_ave_metrics)

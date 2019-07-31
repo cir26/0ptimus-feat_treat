@@ -246,6 +246,21 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         categorical_columns=[i for i in self.X.columns if (self.X[i].dtype != 'float64' and self.X[i].dtype != 'int64')]
         print(categorical_columns)
 
+    def column_unique_sort(self,reverse=False):
+        col_names=[i for i in self.X.columns]
+        col_unique=[len(self.X[i].unique()) for i in col_names]
+        col_unique.sort(reverse=reverse)
+        col_reorder=[]
+        while len(col_names) > 0:
+            for j in col_names:
+                if len(self.X[j].unique())==col_unique[0]:
+                    col_reorder.append(j)
+                    col_unique=col_unique[1:]
+                    col_names.remove(j)
+                else:
+                    pass
+
+
     def encode(self, strategy=None, cat_col=None):
         if cat_col==None:
             cat_col=[i for i in self.X.columns if (self.X[i].dtype != 'float64' and self.X[i].dtype != 'int64')]

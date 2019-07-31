@@ -85,12 +85,13 @@ class static:
                 else:
                     decision=decision[0][0]
                 preds.append(classes[decision])
-            
+
             specificity=1
             neg_pred= 1
             g1=1
             conf_sum =1
             #auc_score = roc_auc_score(y_test,preds,average=average)
+            auc_score = np.nan
 
 
         conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)

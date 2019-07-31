@@ -110,7 +110,7 @@ class validation:
             probs = model.predict_proba(X_test[samples[i][0].columns])
             classes = model.classes_
             #return performance metrics
-            if len(self.y.value_counts())==2:
+            if len(classes)==2:
                 average='binary'
             else:
                 average='micro'

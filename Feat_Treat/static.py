@@ -50,7 +50,7 @@ class static:
             specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
             neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
             g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
-            conf_sum =round(precision+recall+specificity+neg_pred,5)
+
             if verbose == True:
             #-------- ROC CURVE --------------
                 plt1.figure()
@@ -137,6 +137,7 @@ class static:
         recall = round(recall_score(y_test, preds, average=average),5)
         precision = round(precision_score(y_test, preds,average=average),5)
         f2=round(5*((precision*recall)/((4*precision)+recall)),5)
+        conf_sum =round(precision+recall+specificity+neg_pred,5)
 
         #------------------------fix algo------------------------------------
         # specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)

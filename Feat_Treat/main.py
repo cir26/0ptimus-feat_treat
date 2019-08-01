@@ -367,7 +367,6 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 skb =SelectKBest(score_func=chi2, k=k).fit(self.X,self.y)
                 self.X = self.X.iloc[:,skb.get_support(indices=True)]
             else:
-                from sklearn.feature_selection import score_func
                 skb = SelectKBest(score_func=score_func, k=k).fit(self.X,self.y)
                 self.X = self.X.iloc[:,skb.get_support(indices=True)]
 #           section to include optimization loop
@@ -395,8 +394,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                         from sklearn.feature_selection import chi2
                         skb = SelectKBest(score_func=chi2, k=i).fit(X_train,y_train)
                     else:
-                        from sklearn.feature_selection import score_func
-                        skb = SelectKBest(score_func=chi2, k=i).fit(X_train,y_train)
+                        skb = SelectKBest(score_func=score_func, k=i).fit(X_train,y_train)
                     X_train_skb = X_train.iloc[:,skb.get_support(indices=True)]
                     from sklearn.linear_model import LogisticRegression
                     model=LogisticRegression(solver='liblinear')

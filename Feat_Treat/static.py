@@ -28,69 +28,115 @@ from imblearn.combine import SMOTETomek, SMOTEENN
 
 class static:
 
+    @staticmethod
+    def performance_metrics_binary(y_test, probs, pred_threshold=0.5, average='binary', sample_method_label='None', index=0, verbose=True):
+#       returns dataframe of various performance metrics
+        logloss = log_loss(y_test, probs)
+        probs1 = probs[:,1]
+        preds=[]
+        for prediction in probs1:
+            if prediction >= pred_threshold:
+                preds.append(1)
+            else:
+                preds.append(0)
+        fpr, tpr, threshold = roc_curve(y_test, probs1)
+        auc_score = round(auc(fpr,tpr),5)
+        prec, rec, threshold_pr = precision_recall_curve(y_test, probs1)
+        auc_pr_curve = round(auc(rec, prec),5)
+        if verbose == True:
+        #-------- ROC CURVE --------------
+            plt.figure()
+            lw=2
+            plt.plot(fpr, tpr, color='darkorange',lw=lw, label='ROC curve (area = {})'.format(auc_score))
+            plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title(' Sampling: {} \n Receiver Operating Characteristic'.format(sample_method_label))
+            plt.legend(loc="lower right")
+            plt.show()
+          #-------- Precision-Recall CURVE --------------
+            unique_elements, counts_elements = np.unique(y_test, return_counts=True)
+            no_skill=counts_elements[1]/sum(counts_elements)
+            plt.figure()
+            plt.plot(rec, prec, color='darkred',lw=lw, label='Precision-Recall curve (area = {})'.format(auc_pr_curve))
+            plt.plot([0, 1], [no_skill, no_skill], color='navy', lw=lw, linestyle='--')
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.title(' Sampling: {} \n Precision-Recall Curve'.format(sample_method_label))
+            plt.legend(loc="lower right")
+            plt.show()
+            print("\n ")
+        else:
+            pass
+        conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
+        specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
+        neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
+        g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
+        accuracy = round(accuracy_score(y_test, preds),5)
+        ck = round(cohen_kappa_score(y_test,preds),5)
+        mcc = round(matthews_corrcoef(y_test, preds),5)
+        f1 = round(f1_score(y_test, preds,average=average),5)
+        recall = round(recall_score(y_test, preds, average=average),5)
+        precision = round(precision_score(y_test, preds,average=average),5)
+        f2=round(5*((precision*recall)/((4*precision)+recall)),5)
+        conf_sum =round(precision+recall+specificity+neg_pred,5)
+        if verbose==True:
+            print("Accuracy:          ", accuracy)
+            print('Precision:         ', precision)
+            print('Recall:            ', recall)
+            print('Specificity:       ', specificity)
+            print('Neg Pred Val:      ', neg_pred)
+            print('Confusion Sum:     ', conf_sum)
+            print(' ')
+            print('F1 score:          ', f1)
+            print('F2 score:          ', f2)
+            print('G1 score:          ', g1)
+            print('Cohen kappa score: ', ck)
+            print(' ')
+            print("Log loss: ", logloss)
+            print('MCC:               ', mcc)
+            print("AUC:               ", auc_score, "\n")
+        else:
+            pass
+
+#       update self.metrics data
+        df=pd.DataFrame({"Sampling" : sample_method_label,
+                      "Accuracy" : accuracy,
+                      'Precision' : precision,
+                      'Recall' : recall,
+                      'Specificity' : specificity,
+                      'Neg Pred Val' : neg_pred,
+                      'Confusion Sum' : conf_sum,
+                      'F1' : f1,
+                      'F2' : f2,
+                      'G1' : g1,
+                      'Cohen kappa' : ck,
+                      "Log loss" : logloss,
+                      'MCC' : mcc,
+                      "AUC" : auc_score},index=[index])
+        df=df.fillna(0)
+        return df
 
     @staticmethod
-    def performance_metrics(y_test, probs, pred_threshold=0.5, classes=[0, 1], average='binary', sample_method_label='None', index=0, verbose=True):
-#       returns dataframe of various performance metrics
+    def performance_metrics_multiclass(y_test, probs, classes, average='micro', sample_method_label='None', index=0, verbose=True):
         num_classes=len(classes)
+        # Compute ROC curve and ROC area for each class
         logloss = log_loss(y_test, probs)
-        if num_classes==2:
-            probs1 = probs[:,1]
-            preds=[]
-            for prediction in probs1:
-                if prediction >= pred_threshold:
-                    preds.append(1)
-                else:
-                    preds.append(0)
-            fpr, tpr, threshold = roc_curve(y_test, probs1)
-            auc_score = round(auc(fpr,tpr),5)
-            prec, rec, threshold_pr = precision_recall_curve(y_test, probs1)
-            auc_pr_curve = round(auc(rec, prec),5)
-            conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
-            specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
-            neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
-            g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
-
-            if verbose == True:
-            #-------- ROC CURVE --------------
-                plt.figure()
-                lw=2
-                plt.plot(fpr, tpr, color='darkorange',lw=lw, label='ROC curve (area = {})'.format(auc_score))
-                plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-                plt.xlim([0.0, 1.0])
-                plt.ylim([0.0, 1.05])
-                plt.xlabel('False Positive Rate')
-                plt.ylabel('True Positive Rate')
-                plt.title(' Sampling: {} \n Receiver Operating Characteristic'.format(sample_method_label))
-                plt.legend(loc="lower right")
-                plt.show()
-            #-------- Precision-Recall CURVE --------------
-                unique_elements, counts_elements = np.unique(y_test, return_counts=True)
-                no_skill=counts_elements[1]/sum(counts_elements)
-                plt.figure()
-                plt.plot(rec, prec, color='darkred',lw=lw, label='Precision-Recall curve (area = {})'.format(auc_pr_curve))
-                plt.plot([0, 1], [no_skill, no_skill], color='navy', lw=lw, linestyle='--')
-                plt.xlim([0.0, 1.0])
-                plt.ylim([0.0, 1.05])
-                plt.xlabel('Recall')
-                plt.ylabel('Precision')
-                plt.title(' Sampling: {} \n Precision-Recall Curve'.format(sample_method_label))
-                plt.legend(loc="lower right")
-                plt.show()
-                print("\n ")
-            else:
-                pass
-        elif num_classes > 2:
-            # Compute ROC curve and ROC area for each class
-            fpr = dict()
-            tpr = dict()
-            roc_auc = dict()
-            for i in range(num_classes):
-                fpr[i], tpr[i], _ = roc_curve(y_test[:, i], probs[:, i])
-                roc_auc[i] = round(auc(fpr[i], tpr[i]),5)
-            # Compute micro-average ROC curve and ROC area
-            fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), probs.ravel())
-            roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),5)
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        for i in range(num_classes):
+            fpr[i], tpr[i], _ = roc_curve(y_test[:, i], probs[:, i])
+            roc_auc[i] = round(auc(fpr[i], tpr[i]),5)
+        # Compute micro-average ROC curve and ROC area
+        fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), probs.ravel())
+        roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),5)
+        auc_score = round(auc(fpr["micro"], tpr["micro"]),5)
+        if verbose == True:
             plt.figure()
             lw = 2
             plt.plot(fpr[2], tpr[2], color='darkorange',
@@ -115,21 +161,20 @@ class static:
             plt.title('Some extension of Receiver operating characteristic to multi-class')
             plt.legend(loc="lower right")
             plt.show()
-            preds=[]
-            for i in range(0,len(y_test)):
-                decision = np.where(probs[i] == np.amax(probs[i]))
-                if len(decision[0])>1:
-                    decision=choice(decision[0])
-                else:
-                    decision=decision[0][0]
-                preds.append(classes[decision])
-            specificity=1
-            neg_pred= 1
-            g1=1
-            conf_sum =1
-            #auc_score = roc_auc_score(y_test,preds,average=average)
-            auc_score = np.nan
-
+        else:
+            pass
+        preds=[]
+        for i in range(0,len(y_test)):
+            decision = np.where(probs[i] == np.amax(probs[i]))
+            if len(decision[0])>1:
+                decision=choice(decision[0])
+            else:
+                decision=decision[0][0]
+            preds.append(classes[decision])
+        #conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
+        specificity=1
+        neg_pred= 1
+        g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
         accuracy = round(accuracy_score(y_test, preds),5)
         ck = round(cohen_kappa_score(y_test,preds),5)
         mcc = round(matthews_corrcoef(y_test, preds),5)
@@ -138,14 +183,10 @@ class static:
         precision = round(precision_score(y_test, preds,average=average),5)
         f2=round(5*((precision*recall)/((4*precision)+recall)),5)
         conf_sum =round(precision+recall+specificity+neg_pred,5)
-
         #------------------------fix algo------------------------------------
         # specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
         # neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
-        # g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
-        # conf_sum =round(precision+recall+specificity+neg_pred,5)
         #--------------------------------------------------------------------
-
         if verbose==True:
             print("Accuracy:          ", accuracy)
             print('Precision:         ', precision)
@@ -161,10 +202,9 @@ class static:
             print(' ')
             print("Log loss: ", logloss)
             print('MCC:               ', mcc)
-            print("AUC:               ", auc_score, "\n")
+            print("AUC (micro):               ", auc_score, "\n")
         else:
             pass
-
 #       update self.metrics data
         df=pd.DataFrame({"Sampling" : sample_method_label,
                     "Accuracy" : accuracy,
@@ -182,6 +222,7 @@ class static:
                     "AUC" : auc_score},index=[index])
         df=df.fillna(0)
         return df
+
 
     @staticmethod
     def select_hyperparameter_grid(model,feature_set, random_state=42):

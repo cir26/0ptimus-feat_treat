@@ -399,7 +399,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                     from sklearn.linear_model import LogisticRegression
                     model=LogisticRegression(solver='liblinear')
                     model.fit(X_train_skb,y_train)
-                    preds = model.predict(X_test_skb)
+                    preds = model.predict(X_test)
                     score = roc_auc_score(y_test, preds)
                     score_list.append(score)
                     if(score>high_score):

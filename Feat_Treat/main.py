@@ -396,10 +396,11 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                     else:
                         skb = SelectKBest(score_func=score_func, k=i).fit(X_train,y_train)
                     X_train_skb = X_train.iloc[:,skb.get_support(indices=True)]
+                    X_test_skb = skb.transform(X_test)
                     from sklearn.linear_model import LogisticRegression
                     model=LogisticRegression(solver='liblinear')
                     model.fit(X_train_skb,y_train)
-                    preds = model.predict(X_test)
+                    preds = model.predict(X_test_skb)
                     score = roc_auc_score(y_test, preds)
                     score_list.append(score)
                     if(score>high_score):

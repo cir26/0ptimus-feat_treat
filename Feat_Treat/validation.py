@@ -186,10 +186,10 @@ class validation:
                             classes = model.classes_
                             if len(classes)==2:
                                 average='binary'
-                                df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
+                                df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i, verbose=False)
                             else:
                                 average='micro'
-                                df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i)
+                                df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i, verbose=False)
                             metrics_log=metrics_log.append(df)
                             fitted=fitted+1
                         else:
@@ -203,10 +203,10 @@ class validation:
                         classes = model.classes_
                         if len(classes)==2:
                             average='binary'
-                            df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
+                            df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i, verbose=False)
                         else:
                             average='micro'
-                            df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i)
+                            df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i, verbose=False)
                         metrics_log=metrics_log.append(df)
                     else:
                         pass
@@ -218,10 +218,10 @@ class validation:
                     classes = model.classes_
                     if len(classes)==2:
                         average='binary'
-                        df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
+                        df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i, verbose=False)
                     else:
                         average='micro'
-                        df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i)
+                        df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i, verbose=False)
                     metrics_log=metrics_log.append(df)
 #       return dataframe of average column scores of each sampling method
         ave_metrics = metrics_log.groupby("Sampling").mean()

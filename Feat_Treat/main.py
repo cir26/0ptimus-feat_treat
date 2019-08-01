@@ -379,9 +379,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 else:
                     steps=1
                 kof_list=np.arange(self.X.shape[1]-1,1,step=-steps)
-                print(kof_list)
                 check_point=np.arange(1,self.X.shape[1]-1,step=floor(0.1*self.X.shape[1]))
-                print(check_point)
                 high_score=0
                 #Variable to store the optimum features
                 k_best=0
@@ -389,14 +387,14 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 X_train, X_test, y_train, y_test = train_test_split(self.X,self.y, test_size = 0.2, random_state = self.random_state)
                 print("Optimizing...")
                 for i in kof_list:
-                    print("Testing n = ",i)
                     if score_func==None:
                         from sklearn.feature_selection import chi2
-                        skb = SelectKBest(score_func=chi2, k=i).fit(X_train,y_train)
+                        score_func=chi2
+                        skb = SelectKBest(score_func=score_func, k=i).fit(X_train,y_train)
                     else:
                         skb = SelectKBest(score_func=score_func, k=i).fit(X_train,y_train)
                     X_train_skb = X_train.iloc[:,skb.get_support(indices=True)]
-                    X_test_skb = skb.transform(X_test)
+                    X_test_skb = X_test.iloc[:,skb.get_support(indices=True)]
                     from sklearn.linear_model import LogisticRegression
                     model=LogisticRegression(solver='liblinear')
                     model.fit(X_train_skb,y_train)
@@ -409,7 +407,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                     if i in check_point:
                         print(" Best k so far: {} \n Score: {} \n".format(k_best,high_score))
                 print("Optimal k: {} \n Score: {} \n".format(k_best,high_score))
-                skb = SelectKBest(score_func=chi2, k=k_best).fit(self.X,self.y)
+                skb = SelectKBest(score_func=score_func, k=k_best).fit(self.X,self.y)
                 self.X = self.X.iloc[:,skb.get_support(indices=True)]
 
 

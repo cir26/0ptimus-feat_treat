@@ -29,7 +29,7 @@ from imblearn.combine import SMOTETomek, SMOTEENN
 class static:
 
     @staticmethod
-    def performance_metrics_binary(y_test, probs, pred_threshold=0.5, average='binary', sample_method_label='None', index=0, verbose=True):
+    def performance_metrics_binary(y_test, probs, pred_threshold=0.5, sample_method_label='None', index=0, verbose=True):
 #       returns dataframe of various performance metrics
         logloss = log_loss(y_test, probs)
         probs1 = probs[:,1]
@@ -79,9 +79,9 @@ class static:
         accuracy = round(accuracy_score(y_test, preds),5)
         ck = round(cohen_kappa_score(y_test,preds),5)
         mcc = round(matthews_corrcoef(y_test, preds),5)
-        f1 = round(f1_score(y_test, preds,average=average),5)
-        recall = round(recall_score(y_test, preds, average=average),5)
-        precision = round(precision_score(y_test, preds,average=average),5)
+        f1 = round(f1_score(y_test, preds),5)
+        recall = round(recall_score(y_test, preds),5)
+        precision = round(precision_score(y_test, preds),5)
         f2=round(5*((precision*recall)/((4*precision)+recall)),5)
         conf_sum =round(precision+recall+specificity+neg_pred,5)
         if verbose==True:
@@ -122,10 +122,9 @@ class static:
         return df
 
     @staticmethod
-    def performance_metrics_multiclass(y_test, probs, classes, average='micro', sample_method_label='None', index=0, verbose=True):
+    def performance_metrics_multiclass(y_test, probs, preds, classes, weights, sample_method_label='None', index=0, verbose=True):
         num_classes=len(classes)
         # Compute ROC curve and ROC area for each class
-        logloss = log_loss(y_test, probs)
         fpr = dict()
         tpr = dict()
         roc_auc = dict()
@@ -135,7 +134,7 @@ class static:
         # Compute micro-average ROC curve and ROC area
         fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), probs.ravel())
         roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),5)
-        auc_score = round(auc(fpr["micro"], tpr["micro"]),5)
+        #auc_score = round(auc(fpr["micro"], tpr["micro"]),5)
         if verbose == True:
             plt.figure()
             lw = 2
@@ -163,30 +162,71 @@ class static:
             plt.show()
         else:
             pass
-        preds=[]
-        for i in range(0,len(y_test)):
-            decision = np.where(probs[i] == np.amax(probs[i]))
-            if len(decision[0])>1:
-                decision=choice(decision[0])
-            else:
-                decision=decision[0][0]
-            preds.append(classes[decision])
-        #conf_mat = confusion_matrix(y_true=y_test, y_pred=preds)
-        specificity=1
-        neg_pred= 1
-        g1=round(2*((specificity*neg_pred)/(specificity+neg_pred)),5)
-        accuracy = round(accuracy_score(y_test, preds),5)
-        ck = round(cohen_kappa_score(y_test,preds),5)
-        mcc = round(matthews_corrcoef(y_test, preds),5)
-        f1 = round(f1_score(y_test, preds,average=average),5)
-        recall = round(recall_score(y_test, preds, average=average),5)
-        precision = round(precision_score(y_test, preds,average=average),5)
-        f2=round(5*((precision*recall)/((4*precision)+recall)),5)
-        conf_sum =round(precision+recall+specificity+neg_pred,5)
-        #------------------------fix algo------------------------------------
-        # specificity=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
-        # neg_pred= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
-        #--------------------------------------------------------------------
+        # return actual final predictions (shape(:,1))
+        # final_preds=[]
+        # for i in range(0,len(y_test)):
+        #     decision = np.where(probs[i] == np.amax(probs[i]))
+        #     if len(decision[0])>1:
+        #         decision=choice(decision[0])
+        #     else:
+        #         decision=decision[0][0]
+        #     final_preds.append(classes[decision])
+        specificity_multi = dict()
+        neg_pred_multi = dict()
+        g1_multi = dict()
+        accuracy_multi = dict()
+        ck_multi = dict()
+        mcc_multi = dict()
+        f1_multi = dict()
+        recall_multi = dict()
+        precision_multi = dict()
+        f2_multi = dict()
+        conf_sum_multi = dict()
+        auc_score_multi = dict()
+        logloss_multi = dict()
+#       calculate metrics per class
+        for i in range(num_classes):
+            logloss_multi[i] = log_loss(y_test[:,i], probs[:,i])
+            conf_mat = confusion_matrix(y_true=y_test[:,i], y_pred=preds[:,i])
+            specificity_multi[i]=round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[0][1]),5)
+            neg_pred_multi[i]= round(conf_mat[0][0] / (conf_mat[0][0]+conf_mat[1][0]),5)
+            g1_multi[i]=round(2*((specificity_multi[i]*neg_pred_multi[i])/(specificity_multi[i]+neg_pred_multi[i])),5)
+            accuracy_multi[i] = round(accuracy_score(y_test[:,i], preds[:,i]),5)
+            ck_multi[i] = round(cohen_kappa_score(y_test[:,i],preds[:,i]),5)
+            mcc_multi[i] = round(matthews_corrcoef(y_test[:,i], preds[:,i]),5)
+            f1_multi[i] = round(f1_score(y_test[:,i], preds[:,i]),5)
+            recall_multi[i] = round(recall_score(y_test[:,i], preds[:,i]),5)
+            precision_multi[i] = round(precision_score(y_test[:,i], preds[:,i]),5)
+            f2_multi[i]=round(5*((precision_multi[i]*recall_multi[i])/((4*precision_multi[i])+recall_multi[i])),5)
+            conf_sum[i] =round(precision_multi[i]+recall_multi[i]+specificity_multi[i]+neg_pred_multi[i],5)
+            auc_score_multi[i] = round(roc_auc_score(y_test[:,i], preds[:,i]),5)
+#       return sum of metrics weighted by class size
+        accuracy = [x*w for x,w in zip(accuracy_multi,weights)]
+        accuracy= sum(accuracy)
+        precision = [x*w for x,w in zip(precision_multi,weights)]
+        precision = sum(precision)
+        recall = [x*w for x,w in zip(recall_multi,weights)]
+        recall= sum(recall)
+        specificity = [x*w for x,w in zip(specificity_multi,weights)]
+        specificity= sum(specificity)
+        neg_pred = [x*w for x,w in zip(neg_pred_multi,weights)]
+        neg_pred= sum(neg_pred)
+        conf_sum = [x*w for x,w in zip(conf_sum_multi,weights)]
+        conf_sum= sum(conf_sum)
+        f1 = [x*w for x,w in zip(f1_multi,weights)]
+        f1= sum(f1)
+        g1 = [x*w for x,w in zip(g1_multi,weights)]
+        g1= sum(g1)
+        f2 = [x*w for x,w in zip(f2_multi,weights)]
+        f2= sum(f2)
+        ck = [x*w for x,w in zip(ck_multi,weights)]
+        ck= sum(ck)
+        mcc = [x*w for x,w in zip(mcc_multi,weights)]
+        mcc= sum(mcc)
+        auc_score = [x*w for x,w in zip(auc_score_multi,weights)]
+        auc_score= sum(auc_score)
+        logloss = [x*w for x,w in zip(logloss_multi,weights)]
+        logloss= sum(logloss)
         if verbose==True:
             print("Accuracy:          ", accuracy)
             print('Precision:         ', precision)
@@ -202,7 +242,7 @@ class static:
             print(' ')
             print("Log loss: ", logloss)
             print('MCC:               ', mcc)
-            print("AUC (micro):               ", auc_score, "\n")
+            print("AUC:               ", auc_score, "\n")
         else:
             pass
 #       update self.metrics data
@@ -376,7 +416,7 @@ class static:
         # more plots than this becomes confusing
         while (radar_df.shape[0])>4:
             # drop row with lowest AUC score for display purposes
-            low_score_row=[radar_df['F1'].idxmax()]
+            low_score_row=[radar_df['Log loss'].idxmax()]
             radar_df = radar_df.drop(index=low_score_row)
             radar_df = radar_df.reset_index(drop=True)
         # ------- RADAR CHARTS PART 1: Create background

@@ -33,7 +33,8 @@ class validation:
 #       test set will remain untouched until making predictions with tuned model
         col = X_train.columns
         col_length=len(X_train.columns)
-        num_classes=len(np.unique(self.y))
+        classes=self.y.unique()
+        num_classes=len(classes)
 #       instantiate cv stratified fold
         inner_kfold = StratifiedKFold(n_splits=skfold, shuffle=True, random_state=self.random_state)
         #outer_kfold = StratifiedKFold(n_splits=skfold, shuffle=True, random_state=self.random_state)
@@ -64,6 +65,7 @@ class validation:
 #       tune and test
         N = len(samples)
         best_param=[0]*N
+#       initialize metrics df
         self.metrics=pd.DataFrame(columns=["Sampling",
                                            "Accuracy",
                                            'Precision',
@@ -106,24 +108,24 @@ class validation:
             print("Best {}: {} using {} \n".format(tuning_metric, grid_results.best_score_, best_param[i][1]))
             print("Validating model...")
 #           Train model
-            #model = grid_search.best_estimator_
             del grid_results
             if num_classes > 2:
-                y_test=label_binarize(y_test, classes=np.unique(self.y))
-                y_train=label_binarize(y_train, classes=np.unique(self.y))
+                y_counts=self.y.value_counts(1)
+                y_test=label_binarize(y_test, classes=classes)
+                y_train=label_binarize(y_train, classes=classes)
                 model=OneVsRestClassifier(model_rep(**best_param[i][1]))
             else:
                 model=model_rep(**best_param[i][1])
             model.fit(samples[i][0],samples[i][1])
             probs = model.predict_proba(X_test[samples[i][0].columns])
-            classes = model.classes_
             #return performance metrics
-            if len(classes)==2:
-                average='binary'
-                df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
+            if num_classes==2:
+                df = self.performance_metrics_binary(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
             else:
-                average='micro'
-                df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i)
+                classes = model.classes_
+                weights = [y_counts[i] for i in classes]
+                preds = model.predict(X_test[samples[i][0].columns])
+                df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, preds=preds, classes=classes, weights=weights, sample_method_label=samples[i][2],index=i)
             self.metrics=self.metrics.append(df)
 #           end of loop
         self.hyperparameters=best_param
@@ -133,7 +135,7 @@ class validation:
                                 'F1',
                                 'G1',
                                 'Cohen kappa',
-                                'Log Loss',
+                                'Log loss',
                                 'MCC',
                                 'AUC']]
         print("Performance Metrics Summary")
@@ -144,12 +146,8 @@ class validation:
 
     def multi_test_split_validation(self, model, params, iterations, sample = False, test_size = 0.2):
 #       use to validate best hyperparameters by averaging results of multiple random test split iterations
-#       first check if classification is binary or multiclass
-        if len(self.y.value_counts())==2:
-            average='binary'
-        else:
-            average='micro'
 #       initialize metrics dataframe
+        num_classes=len(np.unique(self.y))
         metrics_log=pd.DataFrame(columns=["Sampling",
                                            "Accuracy",
                                            'Precision',
@@ -232,7 +230,7 @@ class validation:
                                  'F1',
                                  'G1',
                                  'Cohen kappa',
-                                 'Log Loss',
+                                 'Log loss',
                                  'MCC',
                                  'AUC']]
         radar_plot = self.create_radar_chart(radar_df=simple_ave_metrics)

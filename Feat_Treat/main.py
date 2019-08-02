@@ -44,7 +44,7 @@ import Feat_Treat.static
 import Feat_Treat.validation
 
 class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
-    def __init__(self,X,y,random_state):
+    def __init__(self,X,y,random_state,variance_filter=True):
         self.X=X
         self.y=y
         self.random_state=random_state
@@ -54,27 +54,17 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         self.metrics='No metrics available'
         self.hyperparameters='No hyperparameters available'
 
-
-        # # remove observations where DV is missing
-        # mask = self.y.isnull()
-        # missing_dv = [i for i in range(0, self.y.shape[0]) if mask[i]==True]
-        # if len(missing_dv)>0:
-        #     self.y = self.y.drop(index=missing_dv)
-        #     self.X = self.X.drop(index=missing_dv)
-        #     self.y = self.y.reset_index(drop=True)
-        #     self.X = self.X.reset_index(drop=True)
-        #     print("The following observations were removed due to missing dependent variable: ", missing_dv, " \n")
-
-        # Low variance filter
-        # check variance of each column
-        # remove column if variance is less than var_threshold
-        drop=[]
-        var_threshold = 0.004975
-        for col in self.X.columns:
-            if self.X[col].dtype!='object':
-                if np.var(self.X[col]) < var_threshold:
-                    drop.append(col)
-        self.X=self.X.drop(columns=drop)
+        if variance_filter == True:
+            # Low variance filter
+            # check variance of each column
+            # remove column if variance is less than var_threshold
+            drop=[]
+            var_threshold = 0.004975
+            for col in self.X.columns:
+                if self.X[col].dtype!='object':
+                    if np.var(self.X[col]) < var_threshold:
+                        drop.append(col)
+            self.X=self.X.drop(columns=drop)
 
         # GET TO KNOW YOUR DATA SET
         # return dataframe indices for categorical datatypes
@@ -86,18 +76,16 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         print('boolean type: ', boolean)
         print('date type: ', date, " \n")
 
-
-        # return base rate
-        if (self.y.dtype != 'float64' and self.y.dtype != 'int64'):
-            y_class_count = self.y.astype(str)
-        else:
-            y_class_count = self.y
-        unique_elements, counts_elements = np.unique(y_class_count, return_counts=True)
-        DV_classes_df = pd.DataFrame({'Class': unique_elements,
-                                      'Count': counts_elements})
-        print(DV_classes_df.to_string(index=False),"\n ")
-        print("Base rate: ",min(counts_elements)/sum(counts_elements))
-
+        # # return base rate
+        # if (self.y.dtype != 'float64' and self.y.dtype != 'int64'):
+        #     y_class_count = self.y.astype(str)
+        # else:
+        #     y_class_count = self.y
+        # unique_elements, counts_elements = np.unique(y_class_count, return_counts=True)
+        # DV_classes_df = pd.DataFrame({'Class': unique_elements,
+        #                               'Count': counts_elements})
+        # print(DV_classes_df.to_string(index=False),"\n ")
+        # print("Base rate: ",min(counts_elements)/sum(counts_elements))
 
     def copy(self,n=1):
         if n==1:
@@ -109,6 +97,16 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 copies.append(copy.deepcopy(self))
             return tuple(copies)
 
+    def drop_missing_dv(self):
+        # remove observations where DV is missing
+        mask = self.y.isnull()
+        missing_dv = [i for i in range(0, self.y.shape[0]) if mask[i]==True]
+        if len(missing_dv)>0:
+            self.y = self.y.drop(index=missing_dv)
+            self.X = self.X.drop(index=missing_dv)
+            self.y = self.y.reset_index(drop=True)
+            self.X = self.X.reset_index(drop=True)
+            print("The following observations were removed due to missing dependent variable: ", missing_dv, " \n")
 
     def check_na(self,percent_threshold=0, axis=1):
         if axis==1:

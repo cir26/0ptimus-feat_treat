@@ -198,7 +198,7 @@ class static:
             recall_multi[i] = round(recall_score(y_test[:,i], preds[:,i]),5)
             precision_multi[i] = round(precision_score(y_test[:,i], preds[:,i]),5)
             f2_multi[i]=round(5*((precision_multi[i]*recall_multi[i])/((4*precision_multi[i])+recall_multi[i])),5)
-            conf_sum[i] =round(precision_multi[i]+recall_multi[i]+specificity_multi[i]+neg_pred_multi[i],5)
+            conf_sum_multi[i] =round(precision_multi[i]+recall_multi[i]+specificity_multi[i]+neg_pred_multi[i],5)
             auc_score_multi[i] = round(roc_auc_score(y_test[:,i], preds[:,i]),5)
 #       return sum of metrics weighted by class size
         accuracy = [x*w for x,w in zip(accuracy_multi,weights)]

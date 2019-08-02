@@ -154,7 +154,7 @@ class static:
             for i, color in zip(range(num_classes), colors):
                 plt.plot(fpr[i], tpr[i], color=color, lw=lw,
                          label='ROC curve of class {0} (area = {1:0.2f})'
-                         ''.format(i, roc_auc[i]))
+                         ''.format(classes[i], roc_auc[i]))
             plt.plot([0, 1], [0, 1], 'k--', lw=lw)
             plt.xlim([0.0, 1.0])
             plt.ylim([0.0, 1.05])
@@ -204,8 +204,9 @@ class static:
             conf_sum_multi[i] =round(precision_multi[i]+recall_multi[i]+specificity_multi[i]+neg_pred_multi[i],5)
             auc_score_multi[i] = round(roc_auc_score(y_test[:,i], preds[:,i]),5)
 #       return sum of metrics weighted by class size
-        accuracy = [x*w for x,w in zip(accuracy_multi,weights)]
-        accuracy= sum(accuracy)
+        #accuracy = [x*w for x,w in zip(accuracy_multi,weights)]
+        accuracy = [x for x in accuracy_multi]
+        accuracy= np.mean(accuracy)
         precision = [x*w for x,w in zip(precision_multi,weights)]
         precision = sum(precision)
         recall = [x*w for x,w in zip(recall_multi,weights)]

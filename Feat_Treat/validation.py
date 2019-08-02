@@ -24,10 +24,13 @@ from skopt.space import Real, Categorical, Integer
 from imblearn.under_sampling import RandomUnderSampler, TomekLinks, OneSidedSelection, NeighbourhoodCleaningRule
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
 from imblearn.combine import SMOTETomek, SMOTEENN
+# timer tool
+from timeit import default_timer as timer
 
 class validation:
 
     def tune_test(self,model,tuning_iter, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, skfold=8):
+        start_time = timer()
 #       split into training and test sets
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)
 #       test set will remain untouched until making predictions with tuned model
@@ -147,10 +150,15 @@ class validation:
         print("Performance Metrics Summary")
         radar_plot = self.create_radar_chart(radar_df=radar_df)
         radar_plot.show()
+        end_time = timer()
+        print("Seconds elapsed: ",(end_time - start_time), "per ",tuning_iter*N," iterations")
+        print("Minutes elapsed: ",(end_time - start_time)/60, "per ",tuning_iter*N," iterations")
+        print("Run Time Rate: ", (end_time - start_time)/(tuning_iter*N), " sec/iter")
 
 
 
     def multi_test_split_validation(self, model, params, iterations, sample = False, test_size = 0.2):
+        start_time = timer()
 #       use to validate best hyperparameters by averaging results of multiple random test split iterations
 #       initialize metrics dataframe
         num_classes=len(np.unique(self.y))
@@ -241,3 +249,7 @@ class validation:
                                  'AUC']]
         radar_plot = self.create_radar_chart(radar_df=simple_ave_metrics)
         radar_plot.show()
+        end_time = timer()
+        print("Seconds elapsed: ",(end_time - start_time), "per ",iterations*N," iterations")
+        print("Minutes elapsed: ",(end_time - start_time)/60, "per ",iterations*N," iterations")
+        print("Run Time Rate: ", (end_time - start_time)/(iterations*N), " sec/iter")

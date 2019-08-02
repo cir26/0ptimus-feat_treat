@@ -38,6 +38,8 @@ from skopt.space import Real, Categorical, Integer
 from imblearn.under_sampling import RandomUnderSampler, TomekLinks, OneSidedSelection, NeighbourhoodCleaningRule
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
 from imblearn.combine import SMOTETomek, SMOTEENN
+# timer tool
+from timeit import default_timer as timer
 
 # self dependencies
 import Feat_Treat.static

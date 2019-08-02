@@ -110,22 +110,27 @@ class validation:
 #           Train model
             del grid_results
             if num_classes > 2:
+#               multi-class
                 y_counts=self.y.value_counts(1)
-                y_test=label_binarize(y_test, classes=classes)
-                y_train=label_binarize(y_train, classes=classes)
+                y_test_binary=label_binarize(y_test, classes=classes)
+                y_train_binary=label_binarize(samples[i][1], classes=classes)
                 model=OneVsRestClassifier(model_rep(**best_param[i][1]))
+                model.fit(samples[i][0],y_train_binary)
             else:
+#               binary class
                 model=model_rep(**best_param[i][1])
-            model.fit(samples[i][0],samples[i][1])
+                model.fit(samples[i][0],samples[i][1])
             probs = model.predict_proba(X_test[samples[i][0].columns])
             #return performance metrics
-            if num_classes==2:
-                df = self.performance_metrics_binary(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
-            else:
+            if num_classes > 2:
+#               multi-class
                 classes = model.classes_
                 weights = [y_counts[i] for i in classes]
                 preds = model.predict(X_test[samples[i][0].columns])
-                df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, preds=preds, classes=classes, weights=weights, sample_method_label=samples[i][2],index=i)
+                df = self.performance_metrics_multiclass(y_test=y_test_binary,probs=probs, preds=preds, classes=classes, weights=weights, sample_method_label=samples[i][2],index=i)
+            else:
+#               binary class
+                df = self.performance_metrics_binary(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
             self.metrics=self.metrics.append(df)
 #           end of loop
         self.hyperparameters=best_param

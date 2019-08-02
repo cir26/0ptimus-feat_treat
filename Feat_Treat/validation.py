@@ -111,7 +111,7 @@ class validation:
             del grid_results
             if num_classes > 2:
 #               multi-class
-                y_counts=self.y.value_counts(1)
+                y_counts=pd.Series(samples[i][1]).value_counts(1)
                 y_test_binary=label_binarize(y_test, classes=classes)
                 y_train_binary=label_binarize(samples[i][1], classes=classes)
                 best_param[i][1].update({'objective': 'reg:logistic'})

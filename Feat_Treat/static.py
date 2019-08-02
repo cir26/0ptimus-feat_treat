@@ -136,7 +136,8 @@ class static:
         roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),5)
         #auc_score = round(auc(fpr["micro"], tpr["micro"]),5)
         if verbose == True:
-            plt.figure()
+            #plt.figure()
+            plt.figure(figsize=(8,8))
             lw = 2
             plt.plot(fpr[2], tpr[2], color='darkorange',
                      lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])

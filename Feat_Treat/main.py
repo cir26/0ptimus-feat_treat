@@ -9,7 +9,7 @@
 
 # required arguments:
 # X = feature pandas dataframe long format
-# y = target pandas dataframe long format
+# y = target pandas series long format
 # random_state = seed for pseudo random number generator to be used throughout treatments
 
 # main dependencies

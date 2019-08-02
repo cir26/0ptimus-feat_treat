@@ -114,6 +114,7 @@ class validation:
                 y_counts=self.y.value_counts(1)
                 y_test_binary=label_binarize(y_test, classes=classes)
                 y_train_binary=label_binarize(samples[i][1], classes=classes)
+                best_param[i][1].update({'objective': 'reg:logistic'})
                 model=OneVsRestClassifier(model_rep(**best_param[i][1]))
                 model.fit(samples[i][0],y_train_binary)
             else:

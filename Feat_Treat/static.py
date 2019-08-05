@@ -126,7 +126,6 @@ class static:
     @staticmethod
     def performance_metrics_multiclass(y_test, probs, preds, classes, weights, sample_method_label='None', index=0, verbose=True):
         num_classes=len(classes)
-        print(classes)
         # Compute ROC curve and ROC area for each class
         fpr = dict()
         tpr = dict()
@@ -204,7 +203,7 @@ class static:
             conf_sum_multi[i] =round(precision_multi[i]+recall_multi[i]+specificity_multi[i]+neg_pred_multi[i],5)
             auc_score_multi[i] = round(roc_auc_score(y_test[:,i], preds[:,i]),5)
 
-        raw_recall= sum(recall_multi.values())/num_classes
+        recall_macro= np.mean(recall_multi.values())
 #       return sum of metrics weighted by class size
         accuracy = [x*w for x,w in zip(accuracy_multi.values(),weights)]
         accuracy= sum(accuracy)
@@ -233,7 +232,7 @@ class static:
         logloss = [x*w for x,w in zip(logloss_multi.values(),weights)]
         logloss= sum(logloss)
         if verbose==True:
-            print("Raw Recall:        ", raw_recall)
+            print("Recall (macro):    ", recall_macro)
             print(" ")
             print("Accuracy:          ", accuracy)
             print('Precision:         ', precision)

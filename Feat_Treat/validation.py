@@ -128,7 +128,7 @@ class validation:
             #return performance metrics
             if num_classes > 2:
 #               multi-class
-                classes = model.classes_
+                #classes = model.classes_
                 weights = [y_counts[i] for i in classes]
                 preds = model.predict(X_test[samples[i][0].columns])
                 df = self.performance_metrics_multiclass(y_test=y_test_binary,probs=probs, preds=preds, classes=classes, weights=weights, sample_method_label=samples[i][2],index=i)

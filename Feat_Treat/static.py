@@ -126,6 +126,7 @@ class static:
     @staticmethod
     def performance_metrics_multiclass(y_test, probs, preds, classes, weights, sample_method_label='None', index=0, verbose=True):
         num_classes=len(classes)
+        print(classes)
         # Compute ROC curve and ROC area for each class
         fpr = dict()
         tpr = dict()
@@ -150,7 +151,7 @@ class static:
             plt.ylabel('True Positive Rate')
             plt.title('Receiver operating characteristic example')
             plt.legend(loc="lower right")
-            colors = cycle(['yellow','aqua', 'darkorange', 'cornflowerblue', 'red','green'])
+            colors = cycle(['xkcd:sun yellow','aqua', 'darkorange', 'cornflowerblue', 'red','green'])
             for i, color in zip(range(num_classes), colors):
                 plt.plot(fpr[i], tpr[i], color=color, lw=lw,
                          label='Class {} (AUC = {})'.format(classes[i], roc_auc[i]))

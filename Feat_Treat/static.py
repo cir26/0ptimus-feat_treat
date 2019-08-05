@@ -132,17 +132,17 @@ class static:
         roc_auc = dict()
         for i in range(num_classes):
             fpr[i], tpr[i], _ = roc_curve(y_test[:, i], probs[:, i])
-            roc_auc[i] = round(auc(fpr[i], tpr[i]),5)
+            roc_auc[i] = round(auc(fpr[i], tpr[i]),3)
         # Compute micro-average ROC curve and ROC area
         fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), probs.ravel())
-        roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),5)
+        roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),3)
         #auc_score = round(auc(fpr["micro"], tpr["micro"]),5)
         if verbose == True:
             #plt.figure()
             plt.figure(figsize=(8,8))
             lw = 2
-            plt.plot(fpr[2], tpr[2], color='darkorange',
-                     lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])
+            plt.plot(fpr["micro"], tpr["micro"], color='darkorange',
+                     lw=lw, label='Micro-average (AUC = {})'.format(roc_auc["micro"]))
             plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
             plt.xlim([0.0, 1.0])
             plt.ylim([0.0, 1.05])
@@ -150,17 +150,16 @@ class static:
             plt.ylabel('True Positive Rate')
             plt.title('Receiver operating characteristic example')
             plt.legend(loc="lower right")
-            colors = cycle(['aqua', 'darkorange', 'cornflowerblue', 'red','green'])
+            colors = cycle(['yellow','aqua', 'darkorange', 'cornflowerblue', 'red','green'])
             for i, color in zip(range(num_classes), colors):
                 plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                         label='ROC curve of class {0} (area = {1:0.2f})'
-                         ''.format(classes[i], roc_auc[i]))
+                         label='Class {} (AUC = {})'.format(classes[i], roc_auc[i]))
             plt.plot([0, 1], [0, 1], 'k--', lw=lw)
             plt.xlim([0.0, 1.0])
             plt.ylim([0.0, 1.05])
             plt.xlabel('False Positive Rate')
             plt.ylabel('True Positive Rate')
-            plt.title('Some extension of Receiver operating characteristic to multi-class')
+            plt.title('Receiver operating characteristic curve')
             plt.legend(loc="lower right")
             plt.show()
         else:
@@ -203,23 +202,8 @@ class static:
             f2_multi[i]=round(5*((precision_multi[i]*recall_multi[i])/((4*precision_multi[i])+recall_multi[i])),5)
             conf_sum_multi[i] =round(precision_multi[i]+recall_multi[i]+specificity_multi[i]+neg_pred_multi[i],5)
             auc_score_multi[i] = round(roc_auc_score(y_test[:,i], preds[:,i]),5)
-        #
-        # print('weights: ', weights)
-        # print('specificity_multi: ', specificity_multi)
-        # print('neg_pred_multi: ', neg_pred_multi)
-        # print('g1_multi: ', g1_multi)
-        # print('accuracy_multi: ',accuracy_multi)
-        # print('ck_multi: ',ck_multi)
-        # print('mcc_multi: ',mcc_multi)
-        # print('f1_multi: ',f1_multi)
-        # print('recall_multi: ',recall_multi)
-        # print('precision_multi: ',precision_multi)
-        # print('f2_multi: ', f2_multi)
-        # print('conf_sum_multi: ',conf_sum_multi)
-        # print('auc_score_multi: ',auc_score_multi)
-        # print('logloss_multi: ',logloss_multi)
 
-
+        Raw_accuracy= sum(accuracy_multi.values())
 #       return sum of metrics weighted by class size
         accuracy = [x*w for x,w in zip(accuracy_multi.values(),weights)]
         accuracy= sum(accuracy)
@@ -248,6 +232,7 @@ class static:
         logloss = [x*w for x,w in zip(logloss_multi.values(),weights)]
         logloss= sum(logloss)
         if verbose==True:
+            print("Raw Accuracy:      ", Raw_accuracy)
             print("Accuracy:          ", accuracy)
             print('Precision:         ', precision)
             print('Recall:            ', recall)
@@ -260,7 +245,7 @@ class static:
             print('G1 score:          ', g1)
             print('Cohen kappa score: ', ck)
             print(' ')
-            print("Log loss: ", logloss)
+            print("Log loss:          ", logloss)
             print('MCC:               ', mcc)
             print("AUC:               ", auc_score, "\n")
         else:

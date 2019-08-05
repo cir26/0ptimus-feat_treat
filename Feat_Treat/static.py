@@ -203,49 +203,49 @@ class static:
             f2_multi[i]=round(5*((precision_multi[i]*recall_multi[i])/((4*precision_multi[i])+recall_multi[i])),5)
             conf_sum_multi[i] =round(precision_multi[i]+recall_multi[i]+specificity_multi[i]+neg_pred_multi[i],5)
             auc_score_multi[i] = round(roc_auc_score(y_test[:,i], preds[:,i]),5)
-
-        print('weights: ', weights)
-        print('specificity_multi: ', specificity_multi)
-        print('neg_pred_multi: ', neg_pred_multi)
-        print('g1_multi: ', g1_multi)
-        print('accuracy_multi: ',accuracy_multi)
-        print('ck_multi: ',ck_multi)
-        print('mcc_multi: ',mcc_multi)
-        print('f1_multi: ',f1_multi)
-        print('recall_multi: ',recall_multi)
-        print('precision_multi: ',precision_multi)
-        print('f2_multi: ', f2_multi)
-        print('conf_sum_multi: ',conf_sum_multi)
-        print('auc_score_multi: ',auc_score_multi)
-        print('logloss_multi: ',logloss_multi)
+        #
+        # print('weights: ', weights)
+        # print('specificity_multi: ', specificity_multi)
+        # print('neg_pred_multi: ', neg_pred_multi)
+        # print('g1_multi: ', g1_multi)
+        # print('accuracy_multi: ',accuracy_multi)
+        # print('ck_multi: ',ck_multi)
+        # print('mcc_multi: ',mcc_multi)
+        # print('f1_multi: ',f1_multi)
+        # print('recall_multi: ',recall_multi)
+        # print('precision_multi: ',precision_multi)
+        # print('f2_multi: ', f2_multi)
+        # print('conf_sum_multi: ',conf_sum_multi)
+        # print('auc_score_multi: ',auc_score_multi)
+        # print('logloss_multi: ',logloss_multi)
 
 
 #       return sum of metrics weighted by class size
-        accuracy = [x*w for x,w in zip(accuracy_multi,weights)]
+        accuracy = [x*w for x,w in zip(accuracy_multi.values(),weights)]
         accuracy= sum(accuracy)
-        precision = [x*w for x,w in zip(precision_multi,weights)]
+        precision = [x*w for x,w in zip(precision_multi.values(),weights)]
         precision = sum(precision)
-        recall = [x*w for x,w in zip(recall_multi,weights)]
+        recall = [x*w for x,w in zip(recall_multi.values(),weights)]
         recall= sum(recall)
-        specificity = [x*w for x,w in zip(specificity_multi,weights)]
+        specificity = [x*w for x,w in zip(specificity_multi.values(),weights)]
         specificity= sum(specificity)
-        neg_pred = [x*w for x,w in zip(neg_pred_multi,weights)]
+        neg_pred = [x*w for x,w in zip(neg_pred_multi.values(),weights)]
         neg_pred= sum(neg_pred)
-        conf_sum = [x*w for x,w in zip(conf_sum_multi,weights)]
+        conf_sum = [x*w for x,w in zip(conf_sum_multi.values(),weights)]
         conf_sum= sum(conf_sum)
-        f1 = [x*w for x,w in zip(f1_multi,weights)]
+        f1 = [x*w for x,w in zip(f1_multi.values(),weights)]
         f1= sum(f1)
-        g1 = [x*w for x,w in zip(g1_multi,weights)]
+        g1 = [x*w for x,w in zip(g1_multi.values(),weights)]
         g1= sum(g1)
-        f2 = [x*w for x,w in zip(f2_multi,weights)]
+        f2 = [x*w for x,w in zip(f2_multi.values(),weights)]
         f2= sum(f2)
-        ck = [x*w for x,w in zip(ck_multi,weights)]
+        ck = [x*w for x,w in zip(ck_multi.values(),weights)]
         ck= sum(ck)
-        mcc = [x*w for x,w in zip(mcc_multi,weights)]
+        mcc = [x*w for x,w in zip(mcc_multi.values(),weights)]
         mcc= sum(mcc)
-        auc_score = [x*w for x,w in zip(auc_score_multi,weights)]
+        auc_score = [x*w for x,w in zip(auc_score_multi.values(),weights)]
         auc_score= sum(auc_score)
-        logloss = [x*w for x,w in zip(logloss_multi,weights)]
+        logloss = [x*w for x,w in zip(logloss_multi.values(),weights)]
         logloss= sum(logloss)
         if verbose==True:
             print("Accuracy:          ", accuracy)

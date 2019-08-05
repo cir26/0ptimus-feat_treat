@@ -24,13 +24,10 @@ from itertools import cycle
 # scikit tools
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler, label_binarize
-from sklearn.decomposition import PCA
-from sklearn.decomposition import TruncatedSVD
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import RFECV
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
-from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
+from sklearn.decomposition import PCA, TruncatedSVD
+from sklearn.feature_selection import SelectKBest, RFECV, f_classif
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold
+from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef 
 from sklearn.multiclass import OneVsRestClassifier
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
@@ -363,8 +360,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         cat_col=[self.X.columns.get_loc(i) for i in self.X.columns if self.X[i].dtype == 'object']
         if isinstance(k,int)==True or isinstance(k,float)==True:
             if score_func==None:
-                from sklearn.feature_selection import chi2
-                skb =SelectKBest(score_func=chi2, k=k).fit(self.X,self.y)
+                skb =SelectKBest(score_func=f_classif, k=k).fit(self.X,self.y)
                 self.X = self.X.iloc[:,skb.get_support(indices=True)]
             else:
                 skb = SelectKBest(score_func=score_func, k=k).fit(self.X,self.y)
@@ -389,7 +385,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 for i in kof_list:
                     if score_func==None:
                         from sklearn.feature_selection import chi2
-                        score_func=chi2
+                        score_func=f_classif
                         skb = SelectKBest(score_func=score_func, k=i).fit(X_train,y_train)
                     else:
                         skb = SelectKBest(score_func=score_func, k=i).fit(X_train,y_train)

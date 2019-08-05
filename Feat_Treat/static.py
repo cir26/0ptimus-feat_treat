@@ -12,7 +12,7 @@ from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.feature_selection import SelectKBest, RFECV, f_classif
-from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold, KFold
 from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
 from sklearn.multiclass import OneVsRestClassifier
 from skopt import BayesSearchCV
@@ -23,7 +23,6 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
 from imblearn.combine import SMOTETomek, SMOTEENN
 # timer tool
 from timeit import default_timer as timer
-
 
 class static:
 
@@ -200,7 +199,7 @@ class static:
             conf_sum_multi[i] =round(precision_multi[i]+recall_multi[i]+specificity_multi[i]+neg_pred_multi[i],5)
             auc_score_multi[i] = round(roc_auc_score(y_test[:,i], preds[:,i]),5)
 
-        recall_macro= np.mean(recall_multi.values())
+        recall_macro= sum(recall_multi.values())/num_classes
 #       return sum of metrics weighted by class size
         accuracy = [x*w for x,w in zip(accuracy_multi.values(),weights)]
         accuracy= sum(accuracy)

@@ -12,7 +12,7 @@ from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.feature_selection import SelectKBest, RFECV, f_classif
-from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold, KFold
 from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
 from sklearn.multiclass import OneVsRestClassifier
 from skopt import BayesSearchCV
@@ -26,7 +26,7 @@ from timeit import default_timer as timer
 
 class validation:
 
-    def tune_test(self,model,tuning_iter, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, skfold=8):
+    def tune_test(self,model,tuning_iter, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, kfold=5, stratified=True):
         start_time = timer()
 #       split into training and test sets
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)
@@ -35,8 +35,11 @@ class validation:
         col_length=len(X_train.columns)
         classes=self.y.unique()
         num_classes=len(classes)
-#       instantiate cv stratified fold
-        inner_kfold = StratifiedKFold(n_splits=skfold, shuffle=True, random_state=self.random_state)
+#       instantiate cv fold
+        if stratified==True:
+            inner_kfold = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=self.random_state)
+        else:
+            inner_kfold = KFold(n_splits=kfold, shuffle=True, random_state=self.random_state)
         #outer_kfold = StratifiedKFold(n_splits=skfold, shuffle=True, random_state=self.random_state)
         if("MLP" in str(model)):
             #standardize data sets

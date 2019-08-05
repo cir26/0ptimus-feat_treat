@@ -26,8 +26,8 @@ from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler, label_binarize
 from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.feature_selection import SelectKBest, RFECV, f_classif
-from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold
-from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef 
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold, KFold
+from sklearn.metrics import log_loss, precision_recall_curve,auc,cohen_kappa_score,accuracy_score,roc_auc_score,roc_curve,brier_score_loss,confusion_matrix,f1_score,recall_score,precision_score,matthews_corrcoef
 from sklearn.multiclass import OneVsRestClassifier
 from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
@@ -199,8 +199,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
             self.X=self.X.iloc[:,rel_col]
 #           check which columns are kept
             keep_col=self.X.columns
-            print(keep_col)
-            print(len(keep_col))
+            print("Number of columns kept: ", len(keep_col))
 #       section to include pcc optimization loop
         else:
             k = ''.join(k.split()).lower()
@@ -384,7 +383,6 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 print("Optimizing...")
                 for i in kof_list:
                     if score_func==None:
-                        from sklearn.feature_selection import chi2
                         score_func=f_classif
                         skb = SelectKBest(score_func=score_func, k=i).fit(X_train,y_train)
                     else:

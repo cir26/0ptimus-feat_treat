@@ -100,7 +100,6 @@ class static:
             print("AUC:", '\t', auc_score, "\n")
         else:
             pass
-
 #       update self.metrics data
         df=pd.DataFrame({"Sampling" : sample_method_label,
                       "Accuracy" : accuracy,
@@ -132,7 +131,6 @@ class static:
         # Compute micro-average ROC curve and ROC area
         fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), probs.ravel())
         roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),3)
-
         # Compute PR curve and area for each class
         prec = dict()
         rec = dict()
@@ -150,13 +148,7 @@ class static:
             lw = 2
             plt.plot(fpr["micro"], tpr["micro"], color='darkorange',
                      lw=lw, label='Micro-average (AUC = {})'.format(roc_auc["micro"]))
-            #plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-            #plt.xlim([0.0, 1.0])
-            #plt.ylim([0.0, 1.05])
-            #plt.xlabel('False Positive Rate')
-            #plt.ylabel('True Positive Rate')
-            #plt.title('Receiver operating characteristic')
-            #plt.legend(loc="lower right")
+
             colors = cycle(['aqua', 'red','xkcd:grass green','cornflowerblue','xkcd:gold'])
             for i, color in zip(range(num_classes), colors):
                 plt.plot(fpr[i], tpr[i], color=color, lw=lw,
@@ -170,9 +162,6 @@ class static:
             plt.legend(loc="lower right")
             plt.show()
             #-------- Precision-Recall CURVE --------------
-            #prec, rec, threshold_pr = precision_recall_curve(y_test, probs1)
-            #auc_pr_curve = round(auc(rec, prec),5)
-            #unique_elements, counts_elements = np.unique(y_test, return_counts=True)
             no_skill=min(weights)
             plt.figure(figsize=(8,8))
             plt.plot(rec["micro"], prec["micro"], color='darkorange',
@@ -187,10 +176,9 @@ class static:
             plt.xlabel('Recall')
             plt.ylabel('Precision')
             plt.title('Precision-Recall Curve')
-            plt.legend(loc="lower right")
+            plt.legend(loc="upper right")
             plt.show()
             print("\n ")
-
         else:
             pass
         # return actual final predictions (shape(:,1))
@@ -215,7 +203,7 @@ class static:
         for i in range(len(actual)):
             if final_preds[i]==actual[i]:
                 correct_pred.append(1)
-        print("Cristian's predictions", '\n', "Raw accuracy: ",len(correct_pred)/len(actual),'\n')
+        print("Cristian's predictions ", '\n', "Raw accuracy: ",len(correct_pred)/len(actual),'\n')
 
         specificity_multi = dict()
         neg_pred_multi = dict()

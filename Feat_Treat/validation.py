@@ -45,6 +45,7 @@ class validation:
             #standardize data sets
             scaler = StandardScaler().fit(X_train)
             X_train = pd.DataFrame(scaler.transform(X_train), columns=col, index=X_train.index)
+            scaler = StandardScaler().fit(X_test)
             X_test = pd.DataFrame(scaler.transform(X_test), columns=col, index=X_test.index)
         else:
             pass
@@ -115,6 +116,7 @@ class validation:
             if num_classes > 2:
 #               multi-class
                 y_counts=pd.Series(samples[i][1]).value_counts(1)
+                print('Actual y: ', y_test)
                 y_test_binary=label_binarize(y_test, classes=classes)
                 y_train_binary=label_binarize(samples[i][1], classes=classes)
                 if("XGB" in str(model)):

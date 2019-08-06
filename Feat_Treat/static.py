@@ -149,7 +149,7 @@ class static:
             plt.figure(figsize=(8,8))
             lw = 2
             plt.plot(fpr["micro"], tpr["micro"], color='darkorange',
-                     lw=lw, label='Micro-average \t (AUC = {})'.format(roc_auc["micro"]))
+                     lw=lw, label='Micro-average (AUC = {})'.format(roc_auc["micro"]))
             #plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
             #plt.xlim([0.0, 1.0])
             #plt.ylim([0.0, 1.05])
@@ -160,7 +160,7 @@ class static:
             colors = cycle(['aqua', 'red','xkcd:grass green','cornflowerblue','xkcd:gold'])
             for i, color in zip(range(num_classes), colors):
                 plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                         label='Class {} \t (AUC = {})'.format(classes[i], roc_auc[i]))
+                         label='Class {} (AUC = {})'.format(classes[i], roc_auc[i]))
             plt.plot([0, 1], [0, 1], 'k--', lw=lw)
             plt.xlim([0.0, 1.0])
             plt.ylim([0.0, 1.05])
@@ -175,13 +175,13 @@ class static:
             #unique_elements, counts_elements = np.unique(y_test, return_counts=True)
             no_skill=min(weights)
             plt.figure(figsize=(8,8))
-            plt.plot(fpr["micro"], tpr["micro"], color='darkorange',
-                     lw=lw, label='Micro-average \t (AUC = {})'.format(roc_auc["micro"]))
+            plt.plot(rec["micro"], prec["micro"], color='darkorange',
+                     lw=lw, label='Micro-average (AUC = {})'.format(roc_auc["micro"]))
             plt.plot([0, 1], [no_skill, no_skill], color='black', lw=lw, linestyle='--')
             colors = cycle(['aqua', 'red','xkcd:grass green','cornflowerblue','xkcd:gold'])
             for i, color in zip(range(num_classes), colors):
-                plt.plot(prec[i], rec[i], color=color, lw=lw,
-                         label='Class {} \t (AUC = {})'.format(classes[i], pr_auc[i]))
+                plt.plot(rec[i], prec[i], color=color, lw=lw,
+                         label='Class {} (AUC = {})'.format(classes[i], pr_auc[i]))
             plt.xlim([0.0, 1.0])
             plt.ylim([0.0, 1.05])
             plt.xlabel('Recall')
@@ -211,11 +211,12 @@ class static:
             else:
                 decision=decision[0][0]
             actual.append(classes[decision])
+        print('Actual y guess: 'actual)
         correct_pred=[]
         for i in range(len(actual)):
             if final_preds[i]==actual[i]:
                 correct_pred.append(1)
-        print("Cristian's predictions", '\n', "Raw accuracy: ",len(correct_pred)/len(actual))
+        print("Cristian's predictions", '\n', "Raw accuracy: ",len(correct_pred)/len(actual),'\n')
 
         specificity_multi = dict()
         neg_pred_multi = dict()
@@ -276,23 +277,23 @@ class static:
         logloss = [x*w for x,w in zip(logloss_multi.values(),weights)]
         logloss= sum(logloss)
         if verbose==True:
-            print("Recall (macro):", '\t', recall_macro)
+            print("Recall (macro):     ", recall_macro)
             print(" ")
-            print("Accuracy:", '\t', accuracy)
-            print('Precision:', '\t', precision)
-            print('Recall:', '\t', recall)
-            print('Specificity:', '\t', specificity)
-            print('Neg Pred Val:', '\t', neg_pred)
-            print('Confusion Sum:', '\t', conf_sum)
+            print("Accuracy:           ", accuracy)
+            print('Precision:          ',  precision)
+            print('Recall:             ',  recall)
+            print('Specificity:        ',  specificity)
+            print('Neg Pred Val:       ', neg_pred)
+            print('Confusion Sum:      ',  conf_sum)
             print(' ')
-            print('F1 score:', '\t', f1)
-            print('F2 score:', '\t', f2)
-            print('G1 score:', '\t', g1)
-            print('Cohen kappa score:', '\t', ck)
+            print('F1 score:           ',  f1)
+            print('F2 score:           ', f2)
+            print('G1 score:           ', g1)
+            print('Cohen kappa score:  ', ck)
             print(' ')
-            print("Log loss:", '\t', logloss)
-            print('MCC:', '\t', mcc)
-            print("AUC:", '\t', auc_score, "\n")
+            print("Log loss:           ", logloss)
+            print('MCC:                ',  mcc)
+            print("AUC:                ", auc_score, "\n")
         else:
             pass
 #       update self.metrics data

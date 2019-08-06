@@ -43,7 +43,7 @@ class static:
         auc_pr_curve = round(auc(rec, prec),5)
         if verbose == True:
         #-------- ROC CURVE --------------
-            plt.figure()
+            plt.figure(figsize=(8,8))
             lw=2
             plt.plot(fpr, tpr, color='darkorange',lw=lw, label='ROC curve (area = {})'.format(auc_score))
             plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
@@ -57,7 +57,7 @@ class static:
           #-------- Precision-Recall CURVE --------------
             unique_elements, counts_elements = np.unique(y_test, return_counts=True)
             no_skill=counts_elements[1]/sum(counts_elements)
-            plt.figure()
+            plt.figure(figsize=(8,8))
             plt.plot(rec, prec, color='darkred',lw=lw, label='Precision-Recall curve (area = {})'.format(auc_pr_curve))
             plt.plot([0, 1], [no_skill, no_skill], color='navy', lw=lw, linestyle='--')
             plt.xlim([0.0, 1.0])
@@ -83,21 +83,21 @@ class static:
         f2=round(5*((precision*recall)/((4*precision)+recall)),5)
         conf_sum =round(precision+recall+specificity+neg_pred,5)
         if verbose==True:
-            print("Accuracy:          ", accuracy)
-            print('Precision:         ', precision)
-            print('Recall:            ', recall)
-            print('Specificity:       ', specificity)
-            print('Neg Pred Val:      ', neg_pred)
-            print('Confusion Sum:     ', conf_sum)
+            print("Accuracy:", '\t', accuracy)
+            print('Precision:', '\t', precision)
+            print('Recall:', '\t', recall)
+            print('Specificity:', '\t', specificity)
+            print('Neg Pred Val:', '\t', neg_pred)
+            print('Confusion Sum:', '\t', conf_sum)
             print(' ')
-            print('F1 score:          ', f1)
-            print('F2 score:          ', f2)
-            print('G1 score:          ', g1)
-            print('Cohen kappa score: ', ck)
+            print('F1 score:', '\t', f1)
+            print('F2 score:', '\t', f2)
+            print('G1 score:', '\t', g1)
+            print('Cohen kappa score:', '\t', ck)
             print(' ')
-            print("Log loss: ", logloss)
-            print('MCC:               ', mcc)
-            print("AUC:               ", auc_score, "\n")
+            print("Log loss:", '\t', logloss)
+            print('MCC:', '\t', mcc)
+            print("AUC:", '\t', auc_score, "\n")
         else:
             pass
 
@@ -132,24 +132,35 @@ class static:
         # Compute micro-average ROC curve and ROC area
         fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), probs.ravel())
         roc_auc["micro"] = round(auc(fpr["micro"], tpr["micro"]),3)
-        #auc_score = round(auc(fpr["micro"], tpr["micro"]),5)
+
+        # Compute PR curve and area for each class
+        prec = dict()
+        rec = dict()
+        pr_auc = dict()
+        for i in range(num_classes):
+            prec[i], rec[i], thres =precision_recall_curve(y_test[:, i], probs[:, i])
+            pr_auc[i] = round(auc(prec[i], rec[i]),3)
+        # Compute micro-average PR curve and area
+        prec["micro"], rec["micro"], thres = precision_recall_curve(y_test.ravel(), probs.ravel())
+        pr_auc["micro"] = round(auc(prec["micro"], rec["micro"]),3)
+
         if verbose == True:
-            #plt.figure()
+            #------------ ROC curve--------------------
             plt.figure(figsize=(8,8))
             lw = 2
             plt.plot(fpr["micro"], tpr["micro"], color='darkorange',
-                     lw=lw, label='Micro-average (AUC = {})'.format(roc_auc["micro"]))
-            plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-            plt.xlim([0.0, 1.0])
-            plt.ylim([0.0, 1.05])
-            plt.xlabel('False Positive Rate')
-            plt.ylabel('True Positive Rate')
-            plt.title('Receiver operating characteristic example')
-            plt.legend(loc="lower right")
+                     lw=lw, label='Micro-average \t (AUC = {})'.format(roc_auc["micro"]))
+            #plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+            #plt.xlim([0.0, 1.0])
+            #plt.ylim([0.0, 1.05])
+            #plt.xlabel('False Positive Rate')
+            #plt.ylabel('True Positive Rate')
+            #plt.title('Receiver operating characteristic')
+            #plt.legend(loc="lower right")
             colors = cycle(['aqua', 'red','xkcd:grass green','cornflowerblue','xkcd:gold'])
             for i, color in zip(range(num_classes), colors):
                 plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                         label='Class {} (AUC = {})'.format(classes[i], roc_auc[i]))
+                         label='Class {} \t (AUC = {})'.format(classes[i], roc_auc[i]))
             plt.plot([0, 1], [0, 1], 'k--', lw=lw)
             plt.xlim([0.0, 1.0])
             plt.ylim([0.0, 1.05])
@@ -158,17 +169,54 @@ class static:
             plt.title('Receiver operating characteristic curve')
             plt.legend(loc="lower right")
             plt.show()
+            #-------- Precision-Recall CURVE --------------
+            #prec, rec, threshold_pr = precision_recall_curve(y_test, probs1)
+            #auc_pr_curve = round(auc(rec, prec),5)
+            #unique_elements, counts_elements = np.unique(y_test, return_counts=True)
+            no_skill=min(weights)
+            plt.figure(figsize=(8,8))
+            plt.plot(fpr["micro"], tpr["micro"], color='darkorange',
+                     lw=lw, label='Micro-average \t (AUC = {})'.format(roc_auc["micro"]))
+            plt.plot([0, 1], [no_skill, no_skill], color='black', lw=lw, linestyle='--')
+            colors = cycle(['aqua', 'red','xkcd:grass green','cornflowerblue','xkcd:gold'])
+            for i, color in zip(range(num_classes), colors):
+                plt.plot(prec[i], rec[i], color=color, lw=lw,
+                         label='Class {} \t (AUC = {})'.format(classes[i], pr_auc[i]))
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.title('Precision-Recall Curve')
+            plt.legend(loc="lower right")
+            plt.show()
+            print("\n ")
+
         else:
             pass
         # return actual final predictions (shape(:,1))
-        # final_preds=[]
-        # for i in range(0,len(y_test)):
-        #     decision = np.where(probs[i] == np.amax(probs[i]))
-        #     if len(decision[0])>1:
-        #         decision=choice(decision[0])
-        #     else:
-        #         decision=decision[0][0]
-        #     final_preds.append(classes[decision])
+        # Cristian's Predictions
+        final_preds=[]
+        for i in range(0,len(preds)):
+            decision = np.where(probs[i] == np.amax(probs[i]))
+            if len(decision[0])>1:
+                decision=choice(decision[0])
+            else:
+                decision=decision[0][0]
+            final_preds.append(classes[decision])
+        actual=[]
+        for i in range(0,len(preds)):
+            decision = np.where(y_test[i] == np.amax(y_test[i]))
+            if len(decision[0])>1:
+                decision=choice(decision[0])
+            else:
+                decision=decision[0][0]
+            actual.append(classes[decision])
+        correct_pred=[]
+        for i in range(len(actual)):
+            if final_preds[i]==actual[i]:
+                correct_pred.append(1)
+        print("Cristian's predictions", '\n', "Raw accuracy: ",len(correct_pred)/len(actual))
+
         specificity_multi = dict()
         neg_pred_multi = dict()
         g1_multi = dict()
@@ -228,23 +276,23 @@ class static:
         logloss = [x*w for x,w in zip(logloss_multi.values(),weights)]
         logloss= sum(logloss)
         if verbose==True:
-            print("Recall (macro):    ", recall_macro)
+            print("Recall (macro):", '\t', recall_macro)
             print(" ")
-            print("Accuracy:          ", accuracy)
-            print('Precision:         ', precision)
-            print('Recall:            ', recall)
-            print('Specificity:       ', specificity)
-            print('Neg Pred Val:      ', neg_pred)
-            print('Confusion Sum:     ', conf_sum)
+            print("Accuracy:", '\t', accuracy)
+            print('Precision:', '\t', precision)
+            print('Recall:', '\t', recall)
+            print('Specificity:', '\t', specificity)
+            print('Neg Pred Val:', '\t', neg_pred)
+            print('Confusion Sum:', '\t', conf_sum)
             print(' ')
-            print('F1 score:          ', f1)
-            print('F2 score:          ', f2)
-            print('G1 score:          ', g1)
-            print('Cohen kappa score: ', ck)
+            print('F1 score:', '\t', f1)
+            print('F2 score:', '\t', f2)
+            print('G1 score:', '\t', g1)
+            print('Cohen kappa score:', '\t', ck)
             print(' ')
-            print("Log loss:          ", logloss)
-            print('MCC:               ', mcc)
-            print("AUC:               ", auc_score, "\n")
+            print("Log loss:", '\t', logloss)
+            print('MCC:', '\t', mcc)
+            print("AUC:", '\t', auc_score, "\n")
         else:
             pass
 #       update self.metrics data

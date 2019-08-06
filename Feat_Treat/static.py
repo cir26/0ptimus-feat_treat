@@ -211,7 +211,6 @@ class static:
             else:
                 decision=decision[0][0]
             actual.append(classes[decision])
-        print('Actual y guess: ',actual)
         correct_pred=[]
         for i in range(len(actual)):
             if final_preds[i]==actual[i]:

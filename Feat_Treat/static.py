@@ -139,10 +139,10 @@ class static:
         pr_auc = dict()
         for i in range(num_classes):
             prec[i], rec[i], thres =precision_recall_curve(y_test[:, i], probs[:, i])
-            pr_auc[i] = round(auc(prec[i], rec[i]),3)
+            pr_auc[i] = round(auc(rec[i], prec[i]),3)
         # Compute micro-average PR curve and area
         prec["micro"], rec["micro"], thres = precision_recall_curve(y_test.ravel(), probs.ravel())
-        pr_auc["micro"] = round(auc(prec["micro"], rec["micro"]),3)
+        pr_auc["micro"] = round(auc(rec["micro"], prec["micro"]),3)
 
         if verbose == True:
             #------------ ROC curve--------------------

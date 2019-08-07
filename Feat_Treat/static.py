@@ -83,21 +83,21 @@ class static:
         f2=round(5*((precision*recall)/((4*precision)+recall)),5)
         conf_sum =round(precision+recall+specificity+neg_pred,5)
         if verbose==True:
-            print("Accuracy:", '\t', accuracy)
-            print('Precision:', '\t', precision)
-            print('Recall:', '\t', recall)
-            print('Specificity:', '\t', specificity)
-            print('Neg Pred Val:', '\t', neg_pred)
-            print('Confusion Sum:', '\t', conf_sum)
+            print("Accuracy:           ", accuracy)
+            print('Precision:          ',  precision)
+            print('Recall:             ',  recall)
+            print('Specificity:        ',  specificity)
+            print('Neg Pred Val:       ', neg_pred)
+            print('Confusion Sum:      ',  conf_sum)
             print(' ')
-            print('F1 score:', '\t', f1)
-            print('F2 score:', '\t', f2)
-            print('G1 score:', '\t', g1)
-            print('Cohen kappa score:', '\t', ck)
+            print('F1 score:           ',  f1)
+            print('F2 score:           ', f2)
+            print('G1 score:           ', g1)
+            print('Cohen kappa score:  ', ck)
             print(' ')
-            print("Log loss:", '\t', logloss)
-            print('MCC:', '\t', mcc)
-            print("AUC:", '\t', auc_score, "\n")
+            print("Log loss:           ", logloss)
+            print('MCC:                ',  mcc)
+            print("AUC:                ", auc_score, "\n")
         else:
             pass
 #       update self.metrics data
@@ -454,7 +454,7 @@ class static:
         # more plots than this becomes confusing
         while (radar_df.shape[0])>4:
             # drop row with lowest AUC score for display purposes
-            low_score_row=[radar_df['Log loss'].idxmax()]
+            low_score_row=[radar_df['MCC'].idxmax()]
             radar_df = radar_df.drop(index=low_score_row)
             radar_df = radar_df.reset_index(drop=True)
         # ------- RADAR CHARTS PART 1: Create background

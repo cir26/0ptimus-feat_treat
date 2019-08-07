@@ -114,7 +114,7 @@ class validation:
 #           Train model
             del grid_results
             if num_classes > 2:
-#               multi-class
+#               multi-class fit
                 y_counts=pd.Series(samples[i][1]).value_counts(1)
                 y_test_binary=label_binarize(y_test, classes=classes)
                 y_train_binary=label_binarize(samples[i][1], classes=classes)
@@ -123,7 +123,7 @@ class validation:
                 model=OneVsRestClassifier(model_rep(**best_param[i][1]))
                 model.fit(samples[i][0],y_train_binary)
             else:
-#               binary class
+#               binary class fit
                 model=model_rep(**best_param[i][1])
                 model.fit(samples[i][0],samples[i][1])
             probs = model.predict_proba(X_test[samples[i][0].columns])
@@ -163,7 +163,8 @@ class validation:
         start_time = timer()
 #       use to validate best hyperparameters by averaging results of multiple random test split iterations
 #       initialize metrics dataframe
-        num_classes=len(np.unique(self.y))
+        classes=self.y.unique()
+        num_classes=len(classes)
         metrics_log=pd.DataFrame(columns=["Sampling",
                                            "Accuracy",
                                            'Precision',
@@ -194,16 +195,29 @@ class validation:
                         if k[0] == samples[i][2]:
                             param = k[1]
                             param.update({'random_state':random[j]})
-                            model=model_rep(**param)
-                            model.fit(samples[i][0],samples[i][1])
-                            probs = model.predict_proba(X_test[samples[i][0].columns])
-                            classes = model.classes_
-                            if len(classes)==2:
-                                average='binary'
-                                df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i, verbose=False)
+                            if num_classes > 2:
+                #               multi-class fit
+                                y_counts=pd.Series(samples[i][1]).value_counts(1)
+                                y_test_binary=label_binarize(y_test, classes=classes)
+                                y_train_binary=label_binarize(samples[i][1], classes=classes)
+                                if("XGB" in str(model)):
+                                    param.update({'objective': 'reg:logistic'})
+                                model=OneVsRestClassifier(model_rep(**param))
+                                model.fit(samples[i][0],y_train_binary)
                             else:
-                                average='micro'
-                                df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i, verbose=False)
+                #               binary class fit
+                                model=model_rep(**param)
+                                model.fit(samples[i][0],samples[i][1])
+                            probs = model.predict_proba(X_test[samples[i][0].columns])
+                            if num_classes > 2:
+                #               multi-class
+                                #classes = model.classes_
+                                weights = [y_counts[i] for i in classes]
+                                preds = model.predict(X_test[samples[i][0].columns])
+                                df = self.performance_metrics_multiclass(y_test=y_test_binary,probs=probs, preds=preds, classes=classes, weights=weights, sample_method_label=samples[i][2],index=i)
+                            else:
+                #               binary class
+                                df = self.performance_metrics_binary(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
                             metrics_log=metrics_log.append(df)
                             fitted=fitted+1
                         else:
@@ -211,31 +225,57 @@ class validation:
                     if fitted==0:
                         param = params[0][1]
                         param.update({'random_state':random[j]})
-                        model=model_rep(**param)
-                        model.fit(samples[i][0],samples[i][1])
-                        probs = model.predict_proba(X_test[samples[i][0].columns])
-                        classes = model.classes_
-                        if len(classes)==2:
-                            average='binary'
-                            df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i, verbose=False)
+                        if num_classes > 2:
+            #               multi-class fit
+                            y_counts=pd.Series(samples[i][1]).value_counts(1)
+                            y_test_binary=label_binarize(y_test, classes=classes)
+                            y_train_binary=label_binarize(samples[i][1], classes=classes)
+                            if("XGB" in str(model)):
+                                param.update({'objective': 'reg:logistic'})
+                            model=OneVsRestClassifier(model_rep(**param))
+                            model.fit(samples[i][0],y_train_binary)
                         else:
-                            average='micro'
-                            df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i, verbose=False)
+            #               binary class fit
+                            model=model_rep(**param)
+                            model.fit(samples[i][0],samples[i][1])
+                        probs = model.predict_proba(X_test[samples[i][0].columns])
+                        if num_classes > 2:
+            #               multi-class
+                            #classes = model.classes_
+                            weights = [y_counts[i] for i in classes]
+                            preds = model.predict(X_test[samples[i][0].columns])
+                            df = self.performance_metrics_multiclass(y_test=y_test_binary,probs=probs, preds=preds, classes=classes, weights=weights, sample_method_label=samples[i][2],index=i)
+                        else:
+            #               binary class
+                            df = self.performance_metrics_binary(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
                         metrics_log=metrics_log.append(df)
                     else:
                         pass
                 else:
                     params.update({'random_state':random[j]})
-                    model=model_rep(**params)
-                    model.fit(samples[i][0],samples[i][1])
-                    probs = model.predict_proba(X_test[samples[i][0].columns])
-                    classes = model.classes_
-                    if len(classes)==2:
-                        average='binary'
-                        df = self.performance_metrics_binary(y_test=y_test,probs=probs, average=average, pred_threshold=0.5, sample_method_label=samples[i][2],index=i, verbose=False)
+                    if num_classes > 2:
+        #               multi-class fit
+                        y_counts=pd.Series(samples[i][1]).value_counts(1)
+                        y_test_binary=label_binarize(y_test, classes=classes)
+                        y_train_binary=label_binarize(samples[i][1], classes=classes)
+                        if("XGB" in str(model)):
+                            param.update({'objective': 'reg:logistic'})
+                        model=OneVsRestClassifier(model_rep(**param))
+                        model.fit(samples[i][0],y_train_binary)
                     else:
-                        average='micro'
-                        df = self.performance_metrics_multiclass(y_test=y_test,probs=probs, classes=classes, average=average, sample_method_label=samples[i][2],index=i, verbose=False)
+        #               binary class fit
+                        model=model_rep(**param)
+                        model.fit(samples[i][0],samples[i][1])
+                    probs = model.predict_proba(X_test[samples[i][0].columns])
+                    if num_classes > 2:
+        #               multi-class
+                        #classes = model.classes_
+                        weights = [y_counts[i] for i in classes]
+                        preds = model.predict(X_test[samples[i][0].columns])
+                        df = self.performance_metrics_multiclass(y_test=y_test_binary,probs=probs, preds=preds, classes=classes, weights=weights, sample_method_label=samples[i][2],index=i)
+                    else:
+        #               binary class
+                        df = self.performance_metrics_binary(y_test=y_test,probs=probs, pred_threshold=0.5, sample_method_label=samples[i][2],index=i)
                     metrics_log=metrics_log.append(df)
 #       return dataframe of average column scores of each sampling method
         ave_metrics = metrics_log.groupby("Sampling").mean()

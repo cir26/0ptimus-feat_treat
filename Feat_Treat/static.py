@@ -19,7 +19,7 @@ from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 # sampling tools
 from imblearn.under_sampling import RandomUnderSampler, TomekLinks, OneSidedSelection, NeighbourhoodCleaningRule
-from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
+from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC, BorderlineSMOTE
 from imblearn.combine import SMOTETomek, SMOTEENN
 # timer tool
 from timeit import default_timer as timer
@@ -498,20 +498,20 @@ class static:
             samples = [(X_train,y_train,"None")]
         else:
             if sample==True:
-                sample=['rus','ros','smote','smotenc','smote+tl','tl','smote+enn', 'neighborhoodcleaning','onesidedselection']
+                sample=['rus','ros','smote','smotenc','smote+tl','tl','smote+enn','borderlinesmote','neighborhoodcleaning','onesidedselection']
             else:
                 pass
             samples = [(X_train,y_train,"None")]
             for i in sample:
                 i=''.join(i.split()).lower()
                 if i in ['rus','randomundersampling','randomundersample']:
-                    rus = RandomUnderSampler(sampling_strategy='auto',n_jobs=-1)
+                    rus = RandomUnderSampler(sampling_strategy='auto')
                     X_rus, y_rus = rus.fit_sample(X_train, y_train)
                     X_rus = pd.DataFrame(X_rus, columns = col)
                     samples.append(tuple([X_rus,y_rus,"Random under sampling"]))
 
                 elif i in ['ros','randomoversampling','randomoversample']:
-                    ros = RandomOverSampler(sampling_strategy='auto',n_jobs=-1)
+                    ros = RandomOverSampler(sampling_strategy='auto')
                     X_ros, y_ros = ros.fit_sample(X_train, y_train)
                     X_ros = pd.DataFrame(X_ros, columns = col)
                     samples.append(tuple([X_ros,y_ros,"Random over sampling"]))
@@ -540,6 +540,12 @@ class static:
                     X_sme, y_sme = sme.fit_sample(X_train, y_train)
                     X_sme = pd.DataFrame(X_sme, columns = col)
                     samples.append(tuple([X_sme,y_sme,"SMOTE + ENN"]))
+
+                elif i in ['borderlinesmote','bls','borderline','bs']:
+                    bs = BorderlineSMOTE(sampling_strategy='auto',n_jobs=-1)
+                    X_bs, y_bs = bs.fit_sample(X_train, y_train)
+                    X_bs = pd.DataFrame(X_bs, columns = col)
+                    samples.append(tuple([X_bs,y_bs,"Borderline SMOTE"]))
 
                 elif i in ['tl','tomek','tomeklink','tomeklinks']:
                     tl=TomekLinks(sampling_strategy='all',n_jobs=-1)

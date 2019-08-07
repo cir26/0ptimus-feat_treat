@@ -19,7 +19,7 @@ from skopt import BayesSearchCV
 from skopt.space import Real, Categorical, Integer
 # sampling tools
 from imblearn.under_sampling import RandomUnderSampler, TomekLinks, OneSidedSelection, NeighbourhoodCleaningRule
-from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
+from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC, BorderlineSMOTE
 from imblearn.combine import SMOTETomek, SMOTEENN
 # timer tool
 from timeit import default_timer as timer

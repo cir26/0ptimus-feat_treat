@@ -395,7 +395,7 @@ class static:
             kernel=Categorical(['rbf','poly','sigmoid'])
             degree=np.arange(1,20,1)
             gamma=np.random.uniform(0,25,10000)
-            coef0=np.random.gamma(0.1,1,10000)
+            coef0=np.random.gamma(0,1,10000)
             shrinking=Categorical([True,False])
             probability=Categorical([True])
             tol=np.random.uniform(0.00000001,0.001,10000)

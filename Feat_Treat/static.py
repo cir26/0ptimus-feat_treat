@@ -203,7 +203,8 @@ class static:
         for i in range(len(actual)):
             if final_preds[i]==actual[i]:
                 correct_pred.append(1)
-        print("Cristian's predictions ", '\n', "Raw accuracy: ",len(correct_pred)/len(actual),'\n')
+        raw_accuracy = len(correct_pred)/len(actual)
+        print("Cristian's predictions ", '\n', "Raw accuracy: ",raw_accuracy,'\n')
 
         specificity_multi = dict()
         neg_pred_multi = dict()
@@ -285,6 +286,7 @@ class static:
             pass
 #       update self.metrics data
         df=pd.DataFrame({"Sampling" : sample_method_label,
+                    'Raw Accuracy': raw_accuracy,
                     "Accuracy" : accuracy,
                     'Precision' : precision,
                     'Recall' : recall,

@@ -281,8 +281,8 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 print("No categorical variables identified in data set")
 
 
-    def rfe(self,n=None,cum=None,rfe_model=None):
-        if isinstance(n,int)==True and cum==None:
+    def rfe(self,n=None,rfe_model=None):
+        if isinstance(n,int)==True:
             if rfe_model==None:
                 from sklearn.linear_model import LogisticRegression
                 rfe_model=LogisticRegression(solver='lbfgs')
@@ -295,9 +295,6 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
                 selector = RFECV(estimator=rfe_model, min_features_to_select = n, cv=kfold, n_jobs=-1).fit(self.X,self.y)
                 keep = [i for i in range(0,len(selector.support_)) if selector.support_[i]==True]
                 self.X=self.iloc[:,keep]
-        elif isinstance(cum,float)==True and n==None:
-            # cumulative feature importance
-            pass
         else:
             n = ''.join(n.split()).lower()
             n = n[:3]

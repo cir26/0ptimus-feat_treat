@@ -70,20 +70,23 @@ class validation:
         N = len(samples)
         best_param=[0]*N
 #       initialize metrics df
-        self.metrics=pd.DataFrame(columns=["Sampling",
-                                           "Accuracy",
-                                           'Precision',
-                                           'Recall',
-                                           'Specificity',
-                                           'Neg Pred Val',
-                                           'Confusion Sum',
-                                           'F1',
-                                           'F2',
-                                           'G1',
-                                           'Cohen kappa',
-                                           "Log loss",
-                                           'MCC',
-                                           "AUC"])
+        metrics_columns =["Sampling",
+                               "Accuracy",
+                               'Precision',
+                               'Recall',
+                               'Specificity',
+                               'Neg Pred Val',
+                               'Confusion Sum',
+                               'F1',
+                               'F2',
+                               'G1',
+                               'Cohen kappa',
+                               "Log loss",
+                               'MCC',
+                               "AUC"]
+        if num_classes > 2:
+            metrics_columns.append('Raw Accuracy')
+        self.metrics=pd.DataFrame(columns=metrics_columns)
 #       copy uninstantiated model for replacement within loop
         model_rep=model
         print("Estimator: ",model_rep, " \n ")
@@ -165,20 +168,23 @@ class validation:
 #       initialize metrics dataframe
         classes=self.y.unique()
         num_classes=len(classes)
-        metrics_log=pd.DataFrame(columns=["Sampling",
-                                           "Accuracy",
-                                           'Precision',
-                                           'Recall',
-                                           'Specificity',
-                                           'Neg Pred Val',
-                                           'Confusion Sum',
-                                           'F1',
-                                           'F2',
-                                           'G1',
-                                           'Cohen kappa',
-                                           "Log loss",
-                                           'MCC',
-                                           "AUC"])
+        metrics_log_columns =["Sampling",
+                               "Accuracy",
+                               'Precision',
+                               'Recall',
+                               'Specificity',
+                               'Neg Pred Val',
+                               'Confusion Sum',
+                               'F1',
+                               'F2',
+                               'G1',
+                               'Cohen kappa',
+                               "Log loss",
+                               'MCC',
+                               "AUC"]
+        if num_classes > 2:
+            metrics_log_columns.append('Raw Accuracy')
+        metrics_log=pd.DataFrame(columns=metrics_log_columns)
         model_rep=model
         random = np.arange(self.random_state,self.random_state+iterations)
         random = [num*randint(1,self.random_state*iterations) for num in random]
@@ -281,14 +287,18 @@ class validation:
         ave_metrics = metrics_log.groupby("Sampling").mean()
         ave_metrics = ave_metrics.reset_index(level="Sampling")
         self.metrics = ave_metrics
-        simple_ave_metrics = ave_metrics[['Sampling',
-                                 'Accuracy',
-                                 'F1',
-                                 'G1',
-                                 'Cohen kappa',
-                                 'Log loss',
-                                 'MCC',
-                                 'AUC']]
+        simple_ave_metrics_columns = ['Sampling',
+                                     'F1',
+                                     'G1',
+                                     'Cohen kappa',
+                                     'Log loss',
+                                     'MCC',
+                                     'AUC']
+        if num_classes > 2:
+            simple_ave_metrics_columns.append('Raw Accuracy')
+        else:
+            simple_ave_metrics_columns.append('Accuracy')
+        simple_ave_metrics = ave_metrics[simple_ave_metrics_columns]
         radar_plot = self.create_radar_chart(radar_df=simple_ave_metrics)
         radar_plot.show()
         end_time = timer()

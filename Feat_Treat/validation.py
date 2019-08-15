@@ -26,7 +26,7 @@ from timeit import default_timer as timer
 
 class validation:
 
-    def tune_test(self,model,tuning_iter, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, kfold=5, stratified=True):
+    def tune_test(self,model,tuning_iter, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, kfold=5, stratified=True, n_jobs=-1):
         start_time = timer()
 #       split into training and test sets
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)
@@ -106,9 +106,9 @@ class validation:
                     optimizer={'base_estimator': 'GBRT'}
                 else:
                     optimizer={'base_estimator': 'GP'}
-                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric,n_points=4, n_jobs=-1, pre_dispatch='2*n_jobs', cv=inner_kfold, n_iter=tuning_iter,verbose=0, optimizer_kwargs=optimizer)
+                grid_search = BayesSearchCV(model_inst, param_grid, scoring=tuning_metric,n_points=4, n_jobs=n_jobs, pre_dispatch='2*n_jobs', cv=inner_kfold, n_iter=tuning_iter,verbose=0, optimizer_kwargs=optimizer)
             elif tuning_strategy=='randomized':
-                grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=-1, pre_dispatch='2*n_jobs', refit=True, cv=inner_kfold, n_iter=tuning_iter,verbose=0)
+                grid_search = RandomizedSearchCV(model_inst, param_grid, scoring=tuning_metric, n_jobs=n_jobs, pre_dispatch='2*n_jobs', refit=True, cv=inner_kfold, n_iter=tuning_iter,verbose=0)
             print('Tuning...')
             grid_results=grid_search.fit(samples[i][0],samples[i][1])
             best_param[i]=(samples[i][2], grid_results.best_estimator_.get_params())

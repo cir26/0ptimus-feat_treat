@@ -265,8 +265,8 @@ class validation:
                         y_test_binary=label_binarize(y_test, classes=classes)
                         y_train_binary=label_binarize(samples[i][1], classes=classes)
                         if("XGB" in str(model)):
-                            param.update({'objective': 'reg:logistic'})
-                        model=OneVsRestClassifier(model_rep(**param))
+                            params.update({'objective': 'reg:logistic'})
+                        model=OneVsRestClassifier(model_rep(**params))
                         model.fit(samples[i][0],y_train_binary)
                     else:
         #               binary class fit

@@ -1,5 +1,5 @@
 # 0ptimus-feat_treat
-Docs related to the feat_treat() object class created for 0ptimus.
+Docs related to the feat_treat() object class created for simplifying machine learning tasks.
 
 
 feat_treat()

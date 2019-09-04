@@ -28,7 +28,7 @@ class validation:
 
     def tune_test(self,model,tuning_iter,test_df=None, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, kfold=5, stratified=True, n_jobs=-1):
         start_time = timer()
-        if test_df=None:
+        if test_df==None:
 #           generate training and test sets
             X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)
         else:

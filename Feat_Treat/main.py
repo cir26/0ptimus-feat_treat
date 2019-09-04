@@ -42,7 +42,7 @@ import Feat_Treat.static
 import Feat_Treat.validation
 
 class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
-    def __init__(self,X,y,random_state,variance_filter=True):
+    def __init__(self,X,y,random_state):
         self.X=X
         self.y=y
         self.random_state=random_state
@@ -52,20 +52,7 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         self.metrics='No metrics available'
         self.hyperparameters='No hyperparameters available'
 
-        if variance_filter == True:
-            # Low variance filter
-            # check variance of each column
-            # remove column if variance is less than var_threshold
-            drop=[]
-            var_threshold = 0.004975
-            for col in self.X.columns:
-                if self.X[col].dtype!='object':
-                    if np.var(self.X[col]) < var_threshold:
-                        drop.append(col)
-            self.X=self.X.drop(columns=drop)
-
-        # GET TO KNOW YOUR DATA SET
-        # return dataframe indices for categorical datatypes
+        # print dataframe indices for categorical datatypes
         obj = [self.X.columns.get_loc(i) for i in self.X.columns if self.X[i].dtype == 'object']
         boolean = [self.X.columns.get_loc(i) for i in self.X.columns if self.X[i].dtype == 'bool']
         date = [self.X.columns.get_loc(i) for i in self.X.columns if self.X[i].dtype == 'datetime64']
@@ -84,7 +71,12 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
         #                               'Count': counts_elements})
         # print(DV_classes_df.to_string(index=False),"\n ")
         # print("Base rate: ",min(counts_elements)/sum(counts_elements))
-
+    def variance_filter(self,var_threshold= 0.004975):
+        # Low variance filter
+        # check variance of each column
+        # remove column if variance is less than var_threshold
+        drop=[col for col in self.X.columns if self.X[col].dtype !='object' if np.var(self.X[col]) < var_threshold]
+        self.X=self.X.drop(columns=drop)
     def copy(self,n=1):
         if n==1:
             return copy.deepcopy(self)
@@ -507,10 +499,11 @@ class feat_treat(Feat_Treat.validation.validation, Feat_Treat.static.static):
 
 
 
-    def match_features(self, to):
+    def match_features_to(self, df):
 #       match object features to argument features
-#       identify columns to drop and add
-        match_columns = to.columns.to_list()
+#       argument dataframe is unaltered
+#       identify columns to drop and columns to add
+        match_columns = df.columns.to_list()
         drop_columns = [col for col in self.X.columns.to_list() if col not in match_columns]
         add_columns = [col for col in match_columns if col not in self.X.columns.to_list()]
 #       first pass: remove extra features

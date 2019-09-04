@@ -26,10 +26,18 @@ from timeit import default_timer as timer
 
 class validation:
 
-    def tune_test(self,model,tuning_iter, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, kfold=5, stratified=True, n_jobs=-1):
+    def tune_test(self,model,tuning_iter,test_df=None, param_grid=None, sample=False,tuning_strategy='bayes',tuning_metric='roc_auc',test_size=0.2, kfold=5, stratified=True, n_jobs=-1):
         start_time = timer()
-#       split into training and test sets
-        X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)
+        if test_df=None:
+#           generate training and test sets
+            X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_size, random_state=self.random_state)
+        else:
+#           testing data passed
+            y_test_label = self.y.to_frame().columns[0]
+            y_test = test_df[y_test_label]
+            X_test = test_df.drop(columns=[y_test_label])
+            X_train = self.X
+            y_train = self.y
 #       test set will remain untouched until making predictions with tuned model
         col = X_train.columns
         col_length=len(X_train.columns)

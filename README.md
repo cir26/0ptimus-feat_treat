@@ -42,5 +42,5 @@ From here, a data object can be created by passing the feature dataframe and the
 
 ``` data = feat_treat(X=feature_set, y=target_set, random_state=42) ```
 
-
+Now `data` is an object which can be operated on using methods defined in the Feat_Treat class.
 

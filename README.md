@@ -26,6 +26,8 @@ imblearn == 0.5.0
 
 scikit-optimize == 0.6.0
 
+*If you installed python via Anaconda Navigator then you only require imblearn and scikit-optimize*
+
 
 # Quick Start: Installing Feat_Treat Package
 To install Feat_Treat use the following statement at the command line:

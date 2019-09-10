@@ -10,7 +10,7 @@ Stores and prints performance metrics as it goes and returns quick visual summar
 
 
 # Quick Start: Requirements
-The following dependencies should be installed in your working environment before getting started (using pip install):
+The following dependencies should be installed in your working environment before getting started (using pip install): 
 pandas == 0.24.2
 numpy == 1.16.2
 matplotlib == 3.0.3

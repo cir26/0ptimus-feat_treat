@@ -12,15 +12,15 @@ Stores and prints performance metrics as it goes and returns quick visual summar
 # Quick Start: Requirements
 The following dependencies should be installed in your working environment before getting started (using pip install): 
 
-pandas == 0.24.2 
+pandas >= 0.24.2 
 
-numpy == 1.16.2
+numpy >= 1.16.2
 
-matplotlib == 3.0.3
+matplotlib >= 3.0.3
 
-scipy == 1.2.1
+scipy >= 1.2.1
 
-scikit-learn == 0.21.2
+scikit-learn >= 0.21.2
 
 imblearn == 0.5.0
 

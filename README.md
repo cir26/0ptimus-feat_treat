@@ -1,5 +1,5 @@
 # feat_treat
-Docs related to the feat_treat() object class created for simplifying machine learning tasks, including tuning of hyperparameters or select ML algorithms.
+Docs related to the feat_treat() object class created for simplifying machine learning tasks, including tuning of hyperparameters for select ML algorithms.
 
 *Currently supported algorithms include Classification Random Forest, Classification Extreme Gradient Boosting (XGB), Classification Support Vector, and Multi-layer Perceptron Neural Network.*
 

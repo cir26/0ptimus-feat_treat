@@ -42,5 +42,6 @@ From here, a data object can be created by passing the feature dataframe and the
 
 ``` data = feat_treat(X=feature_set, y=target_set, random_state=42) ```
 
-Now `data` is an object which can be operated on using methods defined in the Feat_Treat class.
+Now `data` is an object which can be operated on using methods defined in the Feat_Treat class. 
+For example, `data.tune_test(model=RandomForestClassifier, tuning_iter=10, tuning_strategy='bayes:gbrt',  tuning_metric='roc_auc', test_size=0.2, kfold=5, n_jobs=-1)`
 

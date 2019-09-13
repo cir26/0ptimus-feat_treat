@@ -51,7 +51,7 @@ data = feat_treat(X=feature_set, y=target_set, random_state=42)
 ```
 
 Now `data` is an object which can be operated on using methods defined in the Feat_Treat class. 
-For example,
+For example, the following `tune_test` method uses `data` to train a Random Forest classifier with bayes gradient boosted regression tree hyperparameter tuning optimization based on the area under the reciever operating characteristic curve with a 80/20 train/test split and 5-fold validation during tuning.
 
 ```
 data.tune_test(model=RandomForestClassifier, tuning_iter=10, tuning_strategy='bayes:gbrt',  tuning_metric='roc_auc', test_size=0.2, kfold=5, n_jobs=-1)

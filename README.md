@@ -1,7 +1,8 @@
 # feat_treat
 Docs related to the feat_treat() object class created for simplifying machine learning tasks, including tuning of hyperparameters for select ML algorithms.
 
-*Currently supported algorithms include Classification Random Forest, Classification Extreme Gradient Boosting (XGB), Classification Support Vector, and Multi-layer Perceptron Neural Network.*
+*Currently supported algorithms include:
+**Classification -** Random Forest, Extreme Gradient Boosting (XGB), Support Vector, and Multi-layer Perceptron Neural Network.*
 
 Wraps other classes (e.g. sci-kit learn, skopts, imblearn, numpy, etc.) to reduce syntax and simplify redundant feature treatment tasks.
 Stores and prints performance metrics as it goes and returns quick visual summary.

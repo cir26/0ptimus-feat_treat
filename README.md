@@ -40,7 +40,7 @@ Feat_Treat methods/functions are split up into multiple modules which can all be
 
 ``` from Feat_Treat.main import feat_treat ```
 
-From here, a data object can be created by passing the feature dataframe and the target series as arguments to the function feat_treat. Optionally, a random_state can be provided. For example,
+From here, a data object can be created by passing the feature dataframe and the target series as arguments to the function ```feat_treat()```. Optionally, a random_state can be provided. For example,
 
 ``` data = feat_treat(X=feature_set, y=target_set, random_state=42) ```
 

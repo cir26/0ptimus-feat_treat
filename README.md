@@ -30,7 +30,7 @@ scikit-optimize == 0.6.0
 # Quick Start: Installing Feat_Treat Package
 To install Feat_Treat use the following statement at the command line:
 
-``` $ pip install git+https://github.com/cir26/0ptimus-feat_treat ```
+``` $ pip install git+https://github.com/cir26/feat_treat ```
 
 
 # Quick Start: Using Feat_Treat
